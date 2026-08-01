@@ -1,0 +1,55 @@
+"use client";
+
+import { BarChart3 } from "lucide-react";
+import { EmptyState } from "@/components/shared/EmptyState";
+import { BlockTimeChart } from "@/components/dashboard/BlockTimeChart";
+import { useEstadisticasData } from "@/hooks/useEstadisticasData";
+import { StatsSummaryGrid } from "./StatsSummaryGrid";
+import { HoursByTopicChart } from "./HoursByTopicChart";
+import { HoursByTypeChart } from "./HoursByTypeChart";
+import { TestAccuracyChart } from "./TestAccuracyChart";
+import { WeeklyEvolutionChart } from "./WeeklyEvolutionChart";
+
+export function EstadisticasView() {
+  const data = useEstadisticasData();
+
+  if (!data) {
+    return (
+      <EmptyState
+        icon={BarChart3}
+        title="Cargando…"
+        description="Un momento mientras leemos tus datos locales."
+      />
+    );
+  }
+
+  if (data.totalMinutes === 0) {
+    return (
+      <EmptyState
+        icon={BarChart3}
+        title="Todavía no hay estadísticas"
+        description="Registra tus primeras sesiones desde 'Hoy' para ver aquí tu evolución."
+      />
+    );
+  }
+
+  return (
+    <div className="flex flex-col gap-4">
+      <StatsSummaryGrid
+        totalMinutes={data.totalMinutes}
+        streak={data.streak}
+        topicsCompleted={data.topicsCompleted}
+        testsCount={data.testsCount}
+        testAccuracyPercentage={data.testAccuracy.porcentaje}
+        bestWeek={data.bestWeek}
+        averageWeeklyMinutes={data.averageWeeklyMinutes}
+        goalsCompliance={data.goalsCompliance}
+      />
+      <WeeklyEvolutionChart data={data.weeklyEvolution} />
+      <HoursByTopicChart data={data.minutesByTopic} />
+      <BlockTimeChart data={data.minutesByBlock} />
+      <HoursByTypeChart data={data.minutesByType} />
+      <TestAccuracyChart data={data.testAccuracy} />
+    </div>
+  );
+}
