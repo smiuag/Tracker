@@ -13,12 +13,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { RatingPicker } from "@/components/shared/RatingPicker";
 import { QuickNoteInput } from "@/components/hoy/QuickNoteInput";
 import { TOPIC_STATES, TOPIC_STATE_LABELS } from "@/lib/constants/topicStates";
 import { createBlock, createTopic, updateTopic } from "@/lib/services/topics.service";
 import type { Block, Topic } from "@/types/topic";
-import type { EstadoTema, Nivel1a5 } from "@/types/common";
+import type { EstadoTema } from "@/types/common";
 
 const NEW_BLOCK_VALUE = "__new__";
 
@@ -32,9 +31,8 @@ export function TopicForm({ topic, blocks, onSaved }: TopicFormProps) {
   const [nombre, setNombre] = useState(topic?.nombre ?? "");
   const [blockId, setBlockId] = useState(topic?.blockId ?? blocks[0]?.id ?? NEW_BLOCK_VALUE);
   const [newBlockName, setNewBlockName] = useState("");
-  const [dificultad, setDificultad] = useState<Nivel1a5>(topic?.dificultad ?? 3);
   const [notas, setNotas] = useState(topic?.notas ?? "");
-  const [estado, setEstado] = useState<EstadoTema>(topic?.estado ?? "no_iniciado");
+  const [estado, setEstado] = useState<EstadoTema>(topic?.estado ?? "pendiente");
   const [porcentaje, setPorcentaje] = useState(topic?.porcentaje ?? 0);
   const [saving, setSaving] = useState(false);
 
@@ -54,14 +52,13 @@ export function TopicForm({ topic, blocks, onSaved }: TopicFormProps) {
         await updateTopic(topic.id, {
           nombre: nombre.trim(),
           blockId: finalBlockId,
-          dificultad,
           notas,
           estado,
           porcentaje,
         });
         toast.success("Tema actualizado");
       } else {
-        await createTopic({ nombre: nombre.trim(), blockId: finalBlockId, dificultad, notas });
+        await createTopic({ nombre: nombre.trim(), blockId: finalBlockId, notas });
         toast.success("Tema creado");
       }
       onSaved();
@@ -88,7 +85,14 @@ export function TopicForm({ topic, blocks, onSaved }: TopicFormProps) {
         <Label htmlFor="topic-block" className="mb-1.5 text-xs font-medium text-muted-foreground">
           Bloque
         </Label>
-        <Select value={blockId} onValueChange={(v) => v && setBlockId(v)}>
+        <Select
+          value={blockId}
+          onValueChange={(v) => v && setBlockId(v)}
+          items={{
+            ...Object.fromEntries(blocks.map((block) => [block.id, block.nombre])),
+            [NEW_BLOCK_VALUE]: "+ Nuevo bloque…",
+          }}
+        >
           <SelectTrigger id="topic-block" className="w-full">
             <SelectValue />
           </SelectTrigger>
@@ -111,15 +115,17 @@ export function TopicForm({ topic, blocks, onSaved }: TopicFormProps) {
         )}
       </div>
 
-      <RatingPicker label="Dificultad" value={dificultad} onChange={setDificultad} />
-
       {topic && (
         <>
           <div>
             <Label htmlFor="topic-estado" className="mb-1.5 text-xs font-medium text-muted-foreground">
               Estado
             </Label>
-            <Select value={estado} onValueChange={(v) => v && setEstado(v as EstadoTema)}>
+            <Select
+              value={estado}
+              onValueChange={(v) => v && setEstado(v as EstadoTema)}
+              items={TOPIC_STATE_LABELS}
+            >
               <SelectTrigger id="topic-estado" className="w-full">
                 <SelectValue />
               </SelectTrigger>

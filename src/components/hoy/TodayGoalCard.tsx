@@ -2,15 +2,14 @@ import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { minutesToHoursLabel } from "@/lib/utils/date";
-import type { Goal } from "@/types/goal";
 
 interface TodayGoalCardProps {
   totalMinutes: number;
-  goal: Goal | null;
+  goalHours: number | null;
 }
 
-export function TodayGoalCard({ totalMinutes, goal }: TodayGoalCardProps) {
-  const goalMinutes = goal ? goal.valorObjetivo * 60 : null;
+export function TodayGoalCard({ totalMinutes, goalHours }: TodayGoalCardProps) {
+  const goalMinutes = goalHours ? goalHours * 60 : null;
   const percentage = goalMinutes ? Math.round((totalMinutes / goalMinutes) * 100) : 0;
 
   return (
@@ -19,17 +18,17 @@ export function TodayGoalCard({ totalMinutes, goal }: TodayGoalCardProps) {
         <p className="text-sm text-muted-foreground">Objetivo del día</p>
         <p className="text-2xl font-semibold text-foreground">
           {minutesToHoursLabel(totalMinutes)}
-          {goal && (
+          {goalHours && (
             <span className="ml-1 text-base font-normal text-muted-foreground">
-              / {goal.valorObjetivo} h
+              / {goalHours} h
             </span>
           )}
         </p>
-        {goal ? (
+        {goalHours ? (
           <Progress value={Math.min(100, percentage)} className="mt-2 w-full max-w-xs" />
         ) : (
           <Link
-            href="/objetivos"
+            href="/configuracion"
             className="mt-1 inline-block text-sm text-foreground underline underline-offset-2"
           >
             Configura tu objetivo diario

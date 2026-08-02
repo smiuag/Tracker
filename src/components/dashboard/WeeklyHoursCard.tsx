@@ -1,15 +1,31 @@
+"use client";
+
+import { useState } from "react";
 import Link from "next/link";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import { Button } from "@/components/ui/button";
 import { ProgressDonut } from "./ProgressDonut";
-import { minutesToHoursLabel } from "@/lib/utils/date";
+import { useWeekMinutes } from "@/hooks/useWeekMinutes";
+import { addDays, isoWeekDates, minutesToHoursLabel, toFechaISO } from "@/lib/utils/date";
 
 interface WeeklyHoursCardProps {
-  weeklyMinutes: number;
   goalHours: number | null;
 }
 
-export function WeeklyHoursCard({ weeklyMinutes, goalHours }: WeeklyHoursCardProps) {
+function formatDayMonth(fecha: string): string {
+  const [, month, day] = fecha.split("-");
+  return `${day}/${month}`;
+}
+
+export function WeeklyHoursCard({ goalHours }: WeeklyHoursCardProps) {
+  const [weekOffset, setWeekOffset] = useState(0);
+  const today = toFechaISO(new Date());
+  const referenceDate = addDays(today, weekOffset * 7);
+  const weeklyMinutes = useWeekMinutes(referenceDate) ?? 0;
+  const dates = isoWeekDates(referenceDate);
+
   const goalMinutes = goalHours ? goalHours * 60 : null;
   const percentage = goalMinutes ? Math.round((weeklyMinutes / goalMinutes) * 100) : 0;
 
@@ -17,7 +33,28 @@ export function WeeklyHoursCard({ weeklyMinutes, goalHours }: WeeklyHoursCardPro
     <Card>
       <CardContent className="flex flex-col items-center gap-4 sm:flex-row sm:justify-between">
         <div>
-          <p className="text-sm text-muted-foreground">Esta semana</p>
+          <div className="flex items-center gap-1">
+            <Button
+              size="icon-xs"
+              variant="ghost"
+              onClick={() => setWeekOffset((o) => o - 1)}
+              aria-label="Semana anterior"
+            >
+              <ChevronLeft className="size-3.5" />
+            </Button>
+            <p className="text-sm text-muted-foreground">
+              {weekOffset === 0 ? "Esta semana" : `${formatDayMonth(dates[0])} – ${formatDayMonth(dates[6])}`}
+            </p>
+            <Button
+              size="icon-xs"
+              variant="ghost"
+              onClick={() => setWeekOffset((o) => Math.min(0, o + 1))}
+              disabled={weekOffset >= 0}
+              aria-label="Semana siguiente"
+            >
+              <ChevronRight className="size-3.5" />
+            </Button>
+          </div>
           <p className="text-3xl font-semibold text-foreground">
             {minutesToHoursLabel(weeklyMinutes)}
           </p>
@@ -30,10 +67,10 @@ export function WeeklyHoursCard({ weeklyMinutes, goalHours }: WeeklyHoursCardPro
             </>
           ) : (
             <Link
-              href="/objetivos"
+              href="/configuracion"
               className="mt-1 inline-block text-sm text-foreground underline underline-offset-2"
             >
-              Configura tu objetivo semanal
+              Configura tu objetivo diario
             </Link>
           )}
         </div>

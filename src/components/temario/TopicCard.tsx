@@ -1,27 +1,17 @@
-import { RotateCcw } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { TOPIC_STATE_LABELS } from "@/lib/constants/topicStates";
-import { addDays, minutesToHoursLabel, toFechaISO } from "@/lib/utils/date";
+import { minutesToHoursLabel } from "@/lib/utils/date";
 import type { Block, Topic } from "@/types/topic";
-import type { FechaISO } from "@/types/common";
 
 interface TopicCardProps {
   topic: Topic;
   block: Block | undefined;
-  nextReview: FechaISO | undefined;
   onClick: () => void;
 }
 
-function describeReview(fecha: FechaISO): string {
-  const today = toFechaISO(new Date());
-  if (fecha <= today) return fecha === today ? "Repaso hoy" : "Repaso atrasado";
-  if (fecha === addDays(today, 1)) return "Repaso mañana";
-  return `Repaso el ${fecha}`;
-}
-
-export function TopicCard({ topic, block, nextReview, onClick }: TopicCardProps) {
+export function TopicCard({ topic, block, onClick }: TopicCardProps) {
   return (
     <Card
       role="button"
@@ -55,12 +45,6 @@ export function TopicCard({ topic, block, nextReview, onClick }: TopicCardProps)
 
         <div className="flex items-center justify-between text-xs text-muted-foreground">
           <span>{minutesToHoursLabel(topic.tiempoInvertidoMin)}</span>
-          {nextReview && (
-            <span className="flex items-center gap-1">
-              <RotateCcw className="size-3" />
-              {describeReview(nextReview)}
-            </span>
-          )}
         </div>
       </CardContent>
     </Card>

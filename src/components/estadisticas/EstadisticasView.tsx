@@ -7,7 +7,6 @@ import { useEstadisticasData } from "@/hooks/useEstadisticasData";
 import { StatsSummaryGrid } from "./StatsSummaryGrid";
 import { HoursByTopicChart } from "./HoursByTopicChart";
 import { HoursByTypeChart } from "./HoursByTypeChart";
-import { TestAccuracyChart } from "./TestAccuracyChart";
 import { WeeklyEvolutionChart } from "./WeeklyEvolutionChart";
 
 export function EstadisticasView() {
@@ -39,8 +38,6 @@ export function EstadisticasView() {
         totalMinutes={data.totalMinutes}
         streak={data.streak}
         topicsCompleted={data.topicsCompleted}
-        testsCount={data.testsCount}
-        testAccuracyPercentage={data.testAccuracy.porcentaje}
         bestWeek={data.bestWeek}
         averageWeeklyMinutes={data.averageWeeklyMinutes}
         goalsCompliance={data.goalsCompliance}
@@ -49,7 +46,6 @@ export function EstadisticasView() {
       <HoursByTopicChart data={data.minutesByTopic} />
       <BlockTimeChart data={data.minutesByBlock} />
       <HoursByTypeChart data={data.minutesByType} />
-      <TestAccuracyChart data={data.testAccuracy} />
     </div>
   );
 }

@@ -16,6 +16,7 @@ import {
 import { RatingPicker } from "@/components/shared/RatingPicker";
 import { QuickNoteInput } from "./QuickNoteInput";
 import { upsertDailyLog } from "@/lib/services/sessions.service";
+import { evaluateDayEndBadges } from "@/lib/services/badges.service";
 import { minutesToHoursLabel } from "@/lib/utils/date";
 import type { Nivel1a5 } from "@/types/common";
 
@@ -41,6 +42,7 @@ export function EndOfDaySummarySheet({
     setSaving(true);
     try {
       await upsertDailyLog({ fecha, horasObjetivo, reflexion, productividad });
+      await evaluateDayEndBadges(fecha);
       toast.success("Resumen del día guardado");
       setOpen(false);
     } finally {

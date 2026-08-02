@@ -1,6 +1,6 @@
 import { db } from "@/lib/db/db";
 import { createId } from "@/lib/utils/id";
-import { completeNextReviewForTopic, scheduleReviewsForTopic } from "./reviews.service";
+import { evaluateHourMilestones } from "./badges.service";
 import type { DailyLog, StudySession } from "@/types/session";
 
 export type NewStudySession = Omit<StudySession, "id">;
@@ -39,16 +39,7 @@ export async function createSession(input: NewStudySession): Promise<StudySessio
     }
   });
 
-  // Fuera de la transacción anterior (tabla distinta, riesgo de fallo
-  // parcial asumible en una app local de un solo usuario): mantiene la
-  // repetición espaciada al día según lo que se acaba de estudiar.
-  if (session.topicId) {
-    if (session.tipo === "repaso") {
-      await completeNextReviewForTopic(session.topicId, session.fecha);
-    } else {
-      await scheduleReviewsForTopic(session.topicId, session.id, session.fecha);
-    }
-  }
+  await evaluateHourMilestones(session.fecha);
 
   return session;
 }

@@ -1,19 +1,22 @@
 "use client";
 
 import { useLiveQuery } from "dexie-react-hooks";
+import { db } from "@/lib/db/db";
 import { toFechaISO } from "@/lib/utils/date";
-import { getActiveGoal } from "@/lib/services/goals.service";
+import { getDailyGoalHours, getMonthlyGoalHours, getWeeklyGoalHours } from "@/lib/services/settings.service";
 import {
-  getContributionCalendar,
+  getConsecutiveActiveWeeks,
+  getCurrentTopic,
   getMinutesByBlock,
-  getNextReview,
+  getMinutesByTypeForTopic,
+  getMonthMinutes,
   getStreak,
-  getTestsCount,
+  getStreakDetail,
+  getTopicProgressBreakdown,
   getTopicsCompletedCount,
+  getTopicsPendingCount,
   getWeeklyMinutes,
 } from "@/lib/services/stats.service";
-
-const CONTRIBUTION_WEEKS = 12;
 
 export function useDashboardData() {
   return useLiveQuery(async () => {
@@ -21,36 +24,57 @@ export function useDashboardData() {
 
     const [
       weeklyMinutes,
+      monthMinutes,
+      dailyGoalHours,
+      dailyAggregate,
       streak,
+      streakDays,
+      consecutiveActiveWeeks,
       topicsCompleted,
-      testsCount,
-      nextReview,
+      topicsPending,
+      topicProgress,
+      currentTopic,
       minutesByBlock,
-      contributionDays,
-      weeklyGoal,
-      monthlyGoal,
+      weeklyGoalHours,
+      monthlyGoalHours,
     ] = await Promise.all([
       getWeeklyMinutes(today),
+      getMonthMinutes(today),
+      getDailyGoalHours(today),
+      db.dailyAggregates.get(today),
       getStreak(today),
+      getStreakDetail(today),
+      getConsecutiveActiveWeeks(today),
       getTopicsCompletedCount(),
-      getTestsCount(),
-      getNextReview(),
+      getTopicsPendingCount(),
+      getTopicProgressBreakdown(),
+      getCurrentTopic(),
       getMinutesByBlock(),
-      getContributionCalendar(CONTRIBUTION_WEEKS, today),
-      getActiveGoal("semanal", today),
-      getActiveGoal("mensual", today),
+      getWeeklyGoalHours(),
+      getMonthlyGoalHours(today),
     ]);
 
+    const currentTopicMinutesByType = currentTopic
+      ? await getMinutesByTypeForTopic(currentTopic.id)
+      : [];
+
     return {
+      today,
       weeklyMinutes,
+      monthMinutes,
+      dailyMinutes: dailyAggregate?.minutosTotales ?? 0,
+      dailyGoalHours,
       streak,
+      streakDays,
+      consecutiveActiveWeeks,
       topicsCompleted,
-      testsCount,
-      nextReview,
+      topicsPending,
+      topicProgress,
+      currentTopic,
+      currentTopicMinutesByType,
       minutesByBlock,
-      contributionDays,
-      weeklyGoal,
-      monthlyGoal,
+      weeklyGoalHours,
+      monthlyGoalHours,
     };
   }, []);
 }

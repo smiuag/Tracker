@@ -6,6 +6,7 @@ import { EmptyState } from "@/components/shared/EmptyState";
 import { useTemarioData } from "@/hooks/useTemarioData";
 import { BlockFilterTabs, ALL_BLOCKS_VALUE } from "./BlockFilterTabs";
 import { TopicList } from "./TopicList";
+import { NewBlockSheet } from "./NewBlockSheet";
 import { NewTopicSheet } from "./NewTopicSheet";
 import { TopicDetailSheet } from "./TopicDetailSheet";
 import type { Topic } from "@/types/topic";
@@ -25,7 +26,7 @@ export function TemarioView() {
     );
   }
 
-  const { blocks, topics, nextReviewByTopic } = data;
+  const { blocks, topics } = data;
   const filteredTopics =
     selectedBlock === ALL_BLOCKS_VALUE ? topics : topics.filter((t) => t.blockId === selectedBlock);
 
@@ -40,15 +41,13 @@ export function TemarioView() {
       */}
       <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
         <BlockFilterTabs blocks={blocks} value={selectedBlock} onChange={setSelectedBlock} />
-        <NewTopicSheet blocks={blocks} />
+        <div className="flex shrink-0 gap-2">
+          {blocks.length > 0 && <NewTopicSheet blocks={blocks} />}
+          <NewBlockSheet />
+        </div>
       </div>
 
-      <TopicList
-        topics={filteredTopics}
-        blocks={blocks}
-        nextReviewByTopic={nextReviewByTopic}
-        onSelect={setSelectedTopic}
-      />
+      <TopicList topics={filteredTopics} blocks={blocks} onSelect={setSelectedTopic} />
 
       <TopicDetailSheet
         topic={selectedTopic ? topics.find((t) => t.id === selectedTopic.id) ?? null : null}

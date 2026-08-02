@@ -2,18 +2,18 @@
 
 import { useLiveQuery } from "dexie-react-hooks";
 import { toFechaISO } from "@/lib/utils/date";
-import { getActiveGoal } from "@/lib/services/goals.service";
+import { getDailyGoalHours } from "@/lib/services/settings.service";
 import { getDailyLog, getSessionsByFecha } from "@/lib/services/sessions.service";
 
 export function useTodayData() {
   return useLiveQuery(async () => {
     const today = toFechaISO(new Date());
-    const [sessions, dailyGoal, dailyLog] = await Promise.all([
+    const [sessions, dailyGoalHours, dailyLog] = await Promise.all([
       getSessionsByFecha(today),
-      getActiveGoal("diario", today),
+      getDailyGoalHours(today),
       getDailyLog(today),
     ]);
     const totalMinutes = sessions.reduce((sum, s) => sum + s.duracionMin, 0);
-    return { today, sessions, dailyGoal, dailyLog, totalMinutes };
+    return { today, sessions, dailyGoalHours, dailyLog, totalMinutes };
   }, []);
 }

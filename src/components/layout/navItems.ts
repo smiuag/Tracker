@@ -1,5 +1,5 @@
 import type { LucideIcon } from "lucide-react";
-import { LayoutDashboard, Sun, BookOpen, RotateCcw, BarChart3, Settings } from "lucide-react";
+import { LayoutDashboard, Sun, BookOpen, BarChart3, Award, Settings } from "lucide-react";
 
 export interface NavItem {
   href: string;
@@ -11,10 +11,10 @@ export interface NavItem {
 // "Objetivos" no tiene icono propio en la barra: se gestiona desde
 // Configuración y se enlaza desde las tarjetas del Dashboard (UX: <3 clics).
 export const NAV_ITEMS: NavItem[] = [
-  { href: "/", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/", label: "Progreso", icon: LayoutDashboard },
   { href: "/hoy", label: "Hoy", icon: Sun },
   { href: "/temario", label: "Temario", icon: BookOpen },
-  { href: "/repasos", label: "Repasos", icon: RotateCcw },
   { href: "/estadisticas", label: "Estadísticas", icon: BarChart3 },
+  { href: "/logros", label: "Logros", icon: Award },
   { href: "/configuracion", label: "Configuración", icon: Settings },
 ];

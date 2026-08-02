@@ -1,6 +1,9 @@
 import { db } from "@/lib/db/db";
 import { createId } from "@/lib/utils/id";
+import { evaluateTopicBadges } from "./badges.service";
+import { toFechaISO } from "@/lib/utils/date";
 import type { Block, Subtopic, Topic } from "@/types/topic";
+import type { EstadoTema } from "@/types/common";
 
 const BLOCK_COLORS = ["#CAD7C5", "#E7D9D4", "#E9E1D3", "#A9BBA1", "#C9AFA6"];
 
@@ -20,7 +23,7 @@ export async function createBlock(nombre: string): Promise<Block> {
   return block;
 }
 
-export type NewTopic = Pick<Topic, "blockId" | "nombre" | "dificultad" | "notas">;
+export type NewTopic = Pick<Topic, "blockId" | "nombre" | "notas">;
 
 export async function createTopic(input: NewTopic): Promise<Topic> {
   const now = new Date().toISOString();
@@ -28,11 +31,9 @@ export async function createTopic(input: NewTopic): Promise<Topic> {
     id: createId(),
     blockId: input.blockId,
     nombre: input.nombre,
-    estado: "no_iniciado",
+    estado: "pendiente",
     porcentaje: 0,
-    dificultad: input.dificultad,
     notas: input.notas,
-    patronRepasoId: null,
     tiempoInvertidoMin: 0,
     ultimoEstudio: null,
     createdAt: now,
@@ -42,12 +43,58 @@ export async function createTopic(input: NewTopic): Promise<Topic> {
   return topic;
 }
 
+export interface NewTopicRow {
+  nombre: string;
+  estado: EstadoTema;
+  /** Horas ya dedicadas antes de crear el tema, convertidas a minutos. */
+  tiempoInvertidoMin: number;
+  notas: string;
+}
+
+/**
+ * Crea un bloque y todos sus temas de una vez (alta masiva), como se hace al
+ * introducir un temario completo por primera vez. Todo o nada: si falla la
+ * inserción de un tema no se crea el bloque a medias.
+ */
+export async function createBlockWithTopics(blockNombre: string, rows: NewTopicRow[]): Promise<Block> {
+  const now = new Date().toISOString();
+  return db.transaction("rw", db.blocks, db.topics, async () => {
+    const orden = await db.blocks.count();
+    const block: Block = {
+      id: createId(),
+      nombre: blockNombre,
+      color: BLOCK_COLORS[orden % BLOCK_COLORS.length],
+      orden,
+    };
+    await db.blocks.add(block);
+
+    const topics: Topic[] = rows.map((row) => ({
+      id: createId(),
+      blockId: block.id,
+      nombre: row.nombre,
+      estado: row.estado,
+      porcentaje: row.estado === "acabado" ? 100 : 0,
+      notas: row.notas,
+      tiempoInvertidoMin: row.tiempoInvertidoMin,
+      ultimoEstudio: null,
+      createdAt: now,
+      updatedAt: now,
+    }));
+    await db.topics.bulkAdd(topics);
+
+    return block;
+  });
+}
+
 export type TopicUpdate = Partial<
-  Pick<Topic, "nombre" | "blockId" | "estado" | "porcentaje" | "dificultad" | "notas">
+  Pick<Topic, "nombre" | "blockId" | "estado" | "porcentaje" | "notas">
 >;
 
 export async function updateTopic(id: string, patch: TopicUpdate): Promise<void> {
   await db.topics.update(id, { ...patch, updatedAt: new Date().toISOString() });
+  if (patch.estado) {
+    await evaluateTopicBadges(id, toFechaISO(new Date()));
+  }
 }
 
 export async function deleteTopic(id: string): Promise<void> {

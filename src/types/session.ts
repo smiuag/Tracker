@@ -11,9 +11,6 @@ export interface StudySession {
   duracionMin: number;
   fecha: FechaISO;
   observaciones: string;
-  energia: Nivel1a5;
-  concentracion: Nivel1a5;
-  pomodoros: number;
 }
 
 export interface DailyLog {

@@ -1,4 +1,4 @@
-import type { EstadoTema, FechaISO, Nivel1a5 } from "./common";
+import type { EstadoTema, FechaISO } from "./common";
 
 export interface Block {
   id: string;
@@ -13,9 +13,7 @@ export interface Topic {
   nombre: string;
   estado: EstadoTema;
   porcentaje: number;
-  dificultad: Nivel1a5;
   notas: string;
-  patronRepasoId: string | null;
   /** Agregado cacheado, mantenido por sessions.service.ts */
   tiempoInvertidoMin: number;
   /** Agregado cacheado, mantenido por sessions.service.ts */

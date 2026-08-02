@@ -1,11 +1,11 @@
 import { PageHeader } from "@/components/shared/PageHeader";
-import { DashboardView } from "@/components/dashboard/DashboardView";
+import { ProgresoView } from "@/components/dashboard/ProgresoView";
 
-export default function DashboardPage() {
+export default function ProgresoPage() {
   return (
     <>
-      <PageHeader title="Dashboard" subtitle="¿Cómo voy?" />
-      <DashboardView />
+      <PageHeader title="Progreso" subtitle="¿Cómo voy?" />
+      <ProgresoView />
     </>
   );
 }

@@ -64,7 +64,6 @@ export function TopicDetailSheet({ topic, block, blocks, onClose }: TopicDetailS
                 <>
                   <div className="flex items-center gap-2">
                     <Badge variant="secondary">{TOPIC_STATE_LABELS[topic.estado]}</Badge>
-                    <Badge variant="outline">Dificultad {topic.dificultad}/5</Badge>
                   </div>
 
                   <div>

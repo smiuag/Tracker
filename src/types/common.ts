@@ -2,19 +2,18 @@ export type Nivel1a5 = 1 | 2 | 3 | 4 | 5;
 
 export type TipoEstudio =
   | "lectura"
+  | "resumen"
   | "esquema"
-  | "memorizacion"
   | "test"
   | "repaso"
-  | "legislacion";
+  | "fichas";
 
-export type EstadoTema = "no_iniciado" | "en_progreso" | "completado";
-
-export type EstadoRepaso = "pendiente" | "completado" | "pospuesto";
-
-export type TipoObjetivo = "diario" | "semanal" | "mensual" | "anual";
-
-export type MetricaObjetivo = "horas" | "temas" | "tests";
+export type EstadoTema =
+  | "pendiente"
+  | "empezado"
+  | "segunda_vuelta"
+  | "tercera_vuelta"
+  | "acabado";
 
 /** Fecha en formato "YYYY-MM-DD", clave de la mayoría de agregados diarios. */
 export type FechaISO = string;

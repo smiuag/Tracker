@@ -43,16 +43,6 @@ export function endOfMonth(fecha: FechaISO): FechaISO {
   return toFechaISO(new Date(date.getFullYear(), date.getMonth() + 1, 0));
 }
 
-export function startOfYear(fecha: FechaISO): FechaISO {
-  const date = fromFechaISO(fecha);
-  return toFechaISO(new Date(date.getFullYear(), 0, 1));
-}
-
-export function endOfYear(fecha: FechaISO): FechaISO {
-  const date = fromFechaISO(fecha);
-  return toFechaISO(new Date(date.getFullYear(), 11, 31));
-}
-
 export function minutesToHoursLabel(minutes: number): string {
   const hours = Math.floor(minutes / 60);
   const mins = minutes % 60;

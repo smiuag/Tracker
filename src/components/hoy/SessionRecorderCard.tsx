@@ -15,15 +15,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { RatingPicker } from "@/components/shared/RatingPicker";
-import { PomodoroTimer } from "./PomodoroTimer";
+import { BlockSessionRecorder } from "./BlockSessionRecorder";
 import { QuickNoteInput } from "./QuickNoteInput";
 import { useSessionTimer } from "@/hooks/useSessionTimer";
 import { useTopics } from "@/hooks/useTopics";
 import { createSession } from "@/lib/services/sessions.service";
 import { toFechaISO } from "@/lib/utils/date";
 import { STUDY_TYPES, STUDY_TYPE_LABELS } from "@/lib/constants/studyTypes";
-import type { Nivel1a5, TipoEstudio } from "@/types/common";
+import type { TipoEstudio } from "@/types/common";
 
 function formatElapsed(totalSeconds: number): string {
   const minutes = Math.floor(totalSeconds / 60);
@@ -35,22 +34,16 @@ export function SessionRecorderCard() {
   const topics = useTopics();
   const timer = useSessionTimer();
 
-  const [mode, setMode] = useState<"timer" | "manual">("timer");
+  const [mode, setMode] = useState<"timer" | "manual" | "bloques">("timer");
   const [topicId, setTopicId] = useState<string>("none");
   const [tipo, setTipo] = useState<TipoEstudio>("lectura");
-  const [energia, setEnergia] = useState<Nivel1a5>(3);
-  const [concentracion, setConcentracion] = useState<Nivel1a5>(3);
-  const [pomodoros, setPomodoros] = useState(0);
   const [observaciones, setObservaciones] = useState("");
   const [manualMinutes, setManualMinutes] = useState("");
   const [saving, setSaving] = useState(false);
 
   function resetFields() {
-    setPomodoros(0);
     setObservaciones("");
     setManualMinutes("");
-    setEnergia(3);
-    setConcentracion(3);
     timer.reset();
   }
 
@@ -80,9 +73,6 @@ export function SessionRecorderCard() {
         duracionMin,
         fecha: toFechaISO(fin),
         observaciones,
-        energia,
-        concentracion,
-        pomodoros,
       });
       toast.success("Sesión guardada");
       resetFields();
@@ -96,9 +86,12 @@ export function SessionRecorderCard() {
       <div className="flex flex-col gap-4">
         <ToggleGroup
           value={[mode]}
-          onValueChange={(v) => v[0] && setMode(v[0] as "timer" | "manual")}
+          onValueChange={(v) => v[0] && setMode(v[0] as "timer" | "manual" | "bloques")}
           className="w-fit"
         >
+          <ToggleGroupItem value="bloques" className="px-4 data-[state=on]:bg-primary">
+            Bloques
+          </ToggleGroupItem>
           <ToggleGroupItem value="timer" className="px-4 data-[state=on]:bg-primary">
             Cronómetro
           </ToggleGroupItem>
@@ -112,7 +105,14 @@ export function SessionRecorderCard() {
             <Label htmlFor="session-topic" className="mb-1.5 text-xs font-medium text-muted-foreground">
               Tema
             </Label>
-            <Select value={topicId} onValueChange={(v) => setTopicId(v ?? "none")}>
+            <Select
+              value={topicId}
+              onValueChange={(v) => setTopicId(v ?? "none")}
+              items={{
+                none: "Sin tema",
+                ...Object.fromEntries((topics ?? []).map((topic) => [topic.id, topic.nombre])),
+              }}
+            >
               <SelectTrigger id="session-topic" className="w-full">
                 <SelectValue />
               </SelectTrigger>
@@ -130,7 +130,11 @@ export function SessionRecorderCard() {
             <Label htmlFor="session-tipo" className="mb-1.5 text-xs font-medium text-muted-foreground">
               Tipo
             </Label>
-            <Select value={tipo} onValueChange={(v) => setTipo(v as TipoEstudio)}>
+            <Select
+              value={tipo}
+              onValueChange={(v) => setTipo(v as TipoEstudio)}
+              items={STUDY_TYPE_LABELS}
+            >
               <SelectTrigger id="session-tipo" className="w-full">
                 <SelectValue />
               </SelectTrigger>
@@ -145,15 +149,9 @@ export function SessionRecorderCard() {
           </div>
         </div>
 
-        <div className="grid gap-3 sm:grid-cols-2">
-          <RatingPicker label="Energía" value={energia} onChange={setEnergia} />
-          <RatingPicker label="Concentración" value={concentracion} onChange={setConcentracion} />
-        </div>
-
-        <PomodoroTimer count={pomodoros} onChange={setPomodoros} />
         <QuickNoteInput value={observaciones} onChange={setObservaciones} />
 
-        {mode === "timer" ? (
+        {mode === "timer" && (
           <div className="flex items-center gap-3">
             <span className="text-2xl font-semibold tabular-nums text-foreground">
               {formatElapsed(timer.elapsedSeconds)}
@@ -170,7 +168,9 @@ export function SessionRecorderCard() {
               </Button>
             )}
           </div>
-        ) : (
+        )}
+
+        {mode === "manual" && (
           <div className="flex items-end gap-3">
             <div>
               <Label htmlFor="manual-minutes" className="mb-1.5 text-xs font-medium text-muted-foreground">
@@ -189,6 +189,17 @@ export function SessionRecorderCard() {
               Guardar sesión
             </Button>
           </div>
+        )}
+
+        {mode === "bloques" && (
+          <BlockSessionRecorder
+            topics={topics}
+            topicId={topicId}
+            setTopicId={setTopicId}
+            tipo={tipo}
+            observaciones={observaciones}
+            onSaved={resetFields}
+          />
         )}
       </div>
     </SectionCard>

@@ -22,9 +22,9 @@ export function NewTopicSheet({ blocks }: NewTopicSheetProps) {
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
-      <SheetTrigger render={<Button className="gap-1.5" />}>
+      <SheetTrigger render={<Button variant="outline" className="gap-1.5" />}>
         <Plus className="size-4" />
-        Nuevo tema
+        Añadir tema
       </SheetTrigger>
       <SheetContent side="right">
         <SheetHeader>
