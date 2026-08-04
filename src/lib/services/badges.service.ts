@@ -52,10 +52,7 @@ export async function evaluateDayEndBadges(fecha: FechaISO): Promise<void> {
   }
 }
 
-const REACHED_SEGUNDA_VUELTA = new Set(["segunda_vuelta", "tercera_vuelta", "acabado"]);
-const REACHED_TERCERA_VUELTA = new Set(["tercera_vuelta", "acabado"]);
-
-/** Se llama tras cambiar el estado de un tema: tema/bloque acabado, vueltas superadas, mitades. */
+/** Se llama tras cambiar el estado de un tema: tema/bloque acabado, mitades. */
 export async function evaluateTopicBadges(topicId: string, fecha: FechaISO): Promise<void> {
   const topic = await db.topics.get(topicId);
   if (!topic) return;
@@ -69,12 +66,6 @@ export async function evaluateTopicBadges(topicId: string, fecha: FechaISO): Pro
 
   if (blockTopics.every((t) => t.estado === "acabado")) {
     await awardBadge("bloque_acabado", topic.blockId, fecha, "Bloque completado");
-  }
-  if (blockTopics.every((t) => REACHED_SEGUNDA_VUELTA.has(t.estado))) {
-    await awardBadge("primera_vuelta_superada", topic.blockId, fecha, "Bloque en 2ª vuelta");
-  }
-  if (blockTopics.every((t) => REACHED_TERCERA_VUELTA.has(t.estado))) {
-    await awardBadge("segunda_vuelta_superada", topic.blockId, fecha, "Bloque en 3ª vuelta");
   }
 
   const doneInBlock = blockTopics.filter((t) => t.estado === "acabado").length;

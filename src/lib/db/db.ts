@@ -81,3 +81,18 @@ db.version(2)
 db.version(3).stores({
   dailyTasks: "id, fecha",
 });
+
+// v4: el temario pasa de 5 estados (con "vueltas") a 3 (pendiente / en
+// progreso / acabado) tras feedback pidiendo un modelo más simple.
+db.version(4)
+  .stores({})
+  .upgrade(async (tx) => {
+    await tx
+      .table("topics")
+      .toCollection()
+      .modify((topic) => {
+        if (topic.estado === "empezado" || topic.estado === "segunda_vuelta" || topic.estado === "tercera_vuelta") {
+          topic.estado = "en_progreso";
+        }
+      });
+  });

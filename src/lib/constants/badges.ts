@@ -12,18 +12,6 @@ export const BADGE_CATALOG: BadgeDefinition[] = [
   { tipo: "tema_acabado", nombre: "Tema acabado", descripcion: "Terminaste un tema.", repetible: true },
   { tipo: "bloque_acabado", nombre: "Bloque acabado", descripcion: "Terminaste todos los temas de un bloque.", repetible: true },
   {
-    tipo: "primera_vuelta_superada",
-    nombre: "Primera vuelta superada",
-    descripcion: "Todos los temas de un bloque llegaron a 2ª vuelta.",
-    repetible: true,
-  },
-  {
-    tipo: "segunda_vuelta_superada",
-    nombre: "Segunda vuelta superada",
-    descripcion: "Todos los temas de un bloque llegaron a 3ª vuelta.",
-    repetible: true,
-  },
-  {
     tipo: "mitad_bloque",
     nombre: "Mitad de bloque",
     descripcion: "Acabaste la mitad de los temas de un bloque.",

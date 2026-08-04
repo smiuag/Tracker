@@ -8,12 +8,7 @@ export type TipoEstudio =
   | "repaso"
   | "fichas";
 
-export type EstadoTema =
-  | "pendiente"
-  | "empezado"
-  | "segunda_vuelta"
-  | "tercera_vuelta"
-  | "acabado";
+export type EstadoTema = "pendiente" | "en_progreso" | "acabado";
 
 /** Fecha en formato "YYYY-MM-DD", clave de la mayoría de agregados diarios. */
 export type FechaISO = string;

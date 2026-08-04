@@ -74,7 +74,7 @@ export function BlockSessionRecorder({
         await updateTopic(topicId, { estado: "acabado" });
       }
       if (opts.nuevoTopicId) {
-        await updateTopic(opts.nuevoTopicId, { estado: "empezado" });
+        await updateTopic(opts.nuevoTopicId, { estado: "en_progreso" });
         setTopicId(opts.nuevoTopicId);
       } else if (opts.acabado) {
         setTopicId("none");

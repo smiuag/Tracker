@@ -19,7 +19,7 @@ export function TopicProgressBar({ breakdown }: TopicProgressBarProps) {
           <div className="h-full bg-primary" style={{ width: `${pct(completados)}%` }} />
         )}
         {enCurso > 0 && (
-          <div className="h-full bg-primary/45" style={{ width: `${pct(enCurso)}%` }} />
+          <div className="h-full bg-accent" style={{ width: `${pct(enCurso)}%` }} />
         )}
         {pendientes > 0 && (
           <div className="h-full bg-secondary" style={{ width: `${pct(pendientes)}%` }} />
@@ -31,8 +31,8 @@ export function TopicProgressBar({ breakdown }: TopicProgressBarProps) {
           Completados · {completados}
         </span>
         <span className="flex items-center gap-1.5">
-          <span className="size-2 rounded-full bg-primary/45" aria-hidden />
-          En curso · {enCurso}
+          <span className="size-2 rounded-full bg-accent" aria-hidden />
+          En progreso · {enCurso}
         </span>
         <span className="flex items-center gap-1.5">
           <span className="size-2 rounded-full bg-secondary" aria-hidden />

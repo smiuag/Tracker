@@ -86,7 +86,7 @@ export interface TopicProgressBreakdown {
   total: number;
 }
 
-/** 3 segmentos: pendiente / en curso (empezado + 2ª + 3ª vuelta) / acabado. */
+/** 3 segmentos: pendiente / en progreso / acabado. */
 export async function getTopicProgressBreakdown(): Promise<TopicProgressBreakdown> {
   const topics = await db.topics.toArray();
   let pendientes = 0;

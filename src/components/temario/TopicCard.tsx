@@ -1,9 +1,13 @@
+import type { MouseEvent } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { TOPIC_STATE_LABELS } from "@/lib/constants/topicStates";
+import { cn } from "@/lib/utils";
+import { TOPIC_STATES, TOPIC_STATE_LABELS, TOPIC_STATE_BADGE_CLASSES } from "@/lib/constants/topicStates";
+import { updateTopic } from "@/lib/services/topics.service";
 import { minutesToHoursLabel } from "@/lib/utils/date";
 import type { Block, Topic } from "@/types/topic";
+import type { EstadoTema } from "@/types/common";
 
 interface TopicCardProps {
   topic: Topic;
@@ -12,6 +16,12 @@ interface TopicCardProps {
 }
 
 export function TopicCard({ topic, block, onClick }: TopicCardProps) {
+  function handleEstadoClick(e: MouseEvent, estado: EstadoTema) {
+    e.stopPropagation();
+    if (estado === topic.estado) return;
+    void updateTopic(topic.id, { estado });
+  }
+
   return (
     <Card
       role="button"
@@ -25,7 +35,7 @@ export function TopicCard({ topic, block, onClick }: TopicCardProps) {
           <p className="min-w-0 flex-1 truncate text-sm font-medium text-foreground">
             {topic.nombre}
           </p>
-          <Badge variant="secondary" className="shrink-0">
+          <Badge className={cn("shrink-0 border-transparent", TOPIC_STATE_BADGE_CLASSES[topic.estado])}>
             {TOPIC_STATE_LABELS[topic.estado]}
           </Badge>
         </div>
@@ -45,6 +55,24 @@ export function TopicCard({ topic, block, onClick }: TopicCardProps) {
 
         <div className="flex items-center justify-between text-xs text-muted-foreground">
           <span>{minutesToHoursLabel(topic.tiempoInvertidoMin)}</span>
+        </div>
+
+        <div className="flex gap-1.5">
+          {TOPIC_STATES.map((estado) => (
+            <button
+              key={estado}
+              type="button"
+              onClick={(e) => handleEstadoClick(e, estado)}
+              className={cn(
+                "flex-1 rounded-full border px-2 py-1 text-[11px] font-medium transition-colors",
+                topic.estado === estado
+                  ? cn("border-transparent", TOPIC_STATE_BADGE_CLASSES[estado])
+                  : "border-border text-muted-foreground hover:bg-secondary/60"
+              )}
+            >
+              {TOPIC_STATE_LABELS[estado]}
+            </button>
+          ))}
         </div>
       </CardContent>
     </Card>
