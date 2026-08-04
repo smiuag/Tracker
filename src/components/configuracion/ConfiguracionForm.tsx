@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { BackupSection } from "./BackupSection";
+import { SuggestionsSection } from "./SuggestionsSection";
 import { setBlockDurationMin, setGoalConfig, DEFAULT_BLOCK_DURATION_MIN } from "@/lib/services/settings.service";
 import type { GoalConfig, WeekdaysMode } from "@/types/settings";
 
@@ -171,6 +172,8 @@ export function ConfiguracionForm({ goalConfig: initialGoalConfig, blockDuration
       </Button>
 
       <BackupSection />
+
+      <SuggestionsSection />
     </div>
   );
 }
