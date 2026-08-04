@@ -2,11 +2,9 @@ import type { TipoEstudio } from "@/types/common";
 
 export const STUDY_TYPE_LABELS: Record<TipoEstudio, string> = {
   lectura: "Lectura",
-  resumen: "Resumen",
-  esquema: "Esquema",
+  estudio: "Estudio",
   test: "Test",
-  repaso: "Repaso",
-  fichas: "Fichas",
+  otros: "Otros",
 };
 
 export const STUDY_TYPES: TipoEstudio[] = Object.keys(

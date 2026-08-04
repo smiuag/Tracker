@@ -1,12 +1,6 @@
 export type Nivel1a5 = 1 | 2 | 3 | 4 | 5;
 
-export type TipoEstudio =
-  | "lectura"
-  | "resumen"
-  | "esquema"
-  | "test"
-  | "repaso"
-  | "fichas";
+export type TipoEstudio = "lectura" | "estudio" | "test" | "otros";
 
 export type EstadoTema = "pendiente" | "en_progreso" | "acabado";
 

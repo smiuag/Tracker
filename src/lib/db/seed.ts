@@ -113,15 +113,15 @@ export async function seedDatabaseIfEmpty(): Promise<void> {
     observaciones: string;
   }> = [
     { daysAgo: 0, topicIndex: 4, tipo: "lectura", horaInicio: "09:00", minutos: 50, observaciones: "Buen enfoque por la mañana." },
-    { daysAgo: 0, topicIndex: 4, tipo: "esquema", horaInicio: "10:00", minutos: 40, observaciones: "" },
+    { daysAgo: 0, topicIndex: 4, tipo: "estudio", horaInicio: "10:00", minutos: 40, observaciones: "" },
     { daysAgo: 1, topicIndex: 1, tipo: "test", horaInicio: "18:00", minutos: 45, observaciones: "Me distraje un poco." },
     { daysAgo: 2, topicIndex: 2, tipo: "lectura", horaInicio: "09:30", minutos: 60, observaciones: "" },
-    { daysAgo: 3, topicIndex: 2, tipo: "esquema", horaInicio: "17:00", minutos: 35, observaciones: "" },
-    { daysAgo: 4, topicIndex: 1, tipo: "repaso", horaInicio: "09:00", minutos: 30, observaciones: "" },
+    { daysAgo: 3, topicIndex: 2, tipo: "estudio", horaInicio: "17:00", minutos: 35, observaciones: "" },
+    { daysAgo: 4, topicIndex: 1, tipo: "estudio", horaInicio: "09:00", minutos: 30, observaciones: "" },
     { daysAgo: 6, topicIndex: 0, tipo: "test", horaInicio: "19:00", minutos: 50, observaciones: "" },
     { daysAgo: 7, topicIndex: 4, tipo: "lectura", horaInicio: "09:00", minutos: 70, observaciones: "Mejor sesión de la semana." },
-    { daysAgo: 8, topicIndex: 2, tipo: "fichas", horaInicio: "10:15", minutos: 40, observaciones: "" },
-    { daysAgo: 10, topicIndex: 1, tipo: "resumen", horaInicio: "18:30", minutos: 30, observaciones: "Poca energía por la tarde." },
+    { daysAgo: 8, topicIndex: 2, tipo: "estudio", horaInicio: "10:15", minutos: 40, observaciones: "" },
+    { daysAgo: 10, topicIndex: 1, tipo: "estudio", horaInicio: "18:30", minutos: 30, observaciones: "Poca energía por la tarde." },
   ];
 
   const sessions: StudySession[] = sessionPlan.map((plan) => {

@@ -96,3 +96,24 @@ db.version(4)
         }
       });
   });
+
+// v5: el tipo de sesión pasa de 6 valores a 4 (lectura / estudio / test /
+// otros), de nuevo por feedback pidiendo un modelo más simple.
+const TIPO_ESTUDIO_V5_REMAP: Record<string, string> = {
+  resumen: "estudio",
+  esquema: "estudio",
+  repaso: "estudio",
+  fichas: "estudio",
+};
+
+db.version(5)
+  .stores({})
+  .upgrade(async (tx) => {
+    await tx
+      .table("studySessions")
+      .toCollection()
+      .modify((session) => {
+        const next = TIPO_ESTUDIO_V5_REMAP[session.tipo];
+        if (next) session.tipo = next;
+      });
+  });

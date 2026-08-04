@@ -50,9 +50,12 @@ export function EditSessionSheet({ session, topics }: EditSessionSheetProps) {
     setOpen(next);
   }
 
+  const observacionesRequired = tipo === "otros";
+  const canSave = !observacionesRequired || observaciones.trim().length > 0;
+
   async function handleSave() {
     const minutes = Number(duracionMin);
-    if (!minutes || minutes <= 0) return;
+    if (!minutes || minutes <= 0 || !canSave) return;
     setSaving(true);
     try {
       await updateSession(session.id, {
@@ -145,10 +148,14 @@ export function EditSessionSheet({ session, topics }: EditSessionSheetProps) {
             />
           </div>
 
-          <QuickNoteInput value={observaciones} onChange={setObservaciones} />
+          <QuickNoteInput
+            value={observaciones}
+            onChange={setObservaciones}
+            label={observacionesRequired ? "Observaciones (obligatorio para Otros)" : undefined}
+          />
 
           <div className="flex gap-2">
-            <Button onClick={handleSave} disabled={saving || !duracionMin}>
+            <Button onClick={handleSave} disabled={saving || !duracionMin || !canSave}>
               Guardar cambios
             </Button>
             <Button variant="ghost" className="gap-1.5 text-destructive" onClick={handleDelete} disabled={saving}>

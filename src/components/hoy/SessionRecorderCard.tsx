@@ -47,7 +47,9 @@ export function SessionRecorderCard() {
   const [saving, setSaving] = useState(false);
 
   const blockTopics = (topics ?? []).filter((topic) => topic.blockId === blockId);
-  const canSave = blockId !== NONE && topicId !== NONE;
+  const observacionesRequired = tipo === "otros";
+  const canSave =
+    blockId !== NONE && topicId !== NONE && (!observacionesRequired || observaciones.trim().length > 0);
 
   function handleBlockChange(next: string) {
     setBlockId(next);
@@ -189,7 +191,11 @@ export function SessionRecorderCard() {
           </div>
         </div>
 
-        <QuickNoteInput value={observaciones} onChange={setObservaciones} />
+        <QuickNoteInput
+          value={observaciones}
+          onChange={setObservaciones}
+          label={observacionesRequired ? "Observaciones (obligatorio para Otros)" : undefined}
+        />
 
         {mode === "timer" && (
           <div className="flex items-center gap-3">
