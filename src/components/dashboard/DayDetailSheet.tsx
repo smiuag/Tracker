@@ -10,7 +10,7 @@ import {
 import { DailyTaskChecklist } from "@/components/hoy/DailyTaskChecklist";
 import { AddPastSessionForm } from "./AddPastSessionForm";
 import { useDayDetail } from "@/hooks/useDayDetail";
-import { minutesToHoursLabel } from "@/lib/utils/date";
+import { minutesToHoursLabel, toFechaISO } from "@/lib/utils/date";
 import type { FechaISO } from "@/types/common";
 
 interface DayDetailSheetProps {
@@ -20,6 +20,7 @@ interface DayDetailSheetProps {
 
 export function DayDetailSheet({ fecha, onClose }: DayDetailSheetProps) {
   const detail = useDayDetail(fecha);
+  const isPastDay = !!fecha && fecha < toFechaISO(new Date());
 
   return (
     <Sheet open={!!fecha} onOpenChange={(open) => !open && onClose()}>
@@ -60,7 +61,7 @@ export function DayDetailSheet({ fecha, onClose }: DayDetailSheetProps) {
                 <p className="text-sm text-muted-foreground">Sin sesiones registradas este día.</p>
               )}
 
-              <AddPastSessionForm fecha={fecha} />
+              {isPastDay && <AddPastSessionForm fecha={fecha} />}
 
               <DailyTaskChecklist fecha={fecha} />
             </div>
