@@ -11,7 +11,7 @@ interface EstadoFilterTabsProps {
 export function EstadoFilterTabs({ value, onChange }: EstadoFilterTabsProps) {
   return (
     <Tabs value={value} onValueChange={(v) => v && onChange(v)} className="min-w-0">
-      <TabsList className="w-full justify-start overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+      <TabsList className="w-full touch-pan-x justify-start overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         <TabsTrigger value={ALL_STATES_VALUE}>Todos</TabsTrigger>
         {TOPIC_STATES.map((estado) => (
           <TabsTrigger key={estado} value={estado}>
