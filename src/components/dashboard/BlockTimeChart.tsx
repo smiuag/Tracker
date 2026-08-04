@@ -3,7 +3,7 @@
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
 import { SectionCard } from "@/components/shared/SectionCard";
 import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from "@/components/ui/chart";
-import { minutesToHoursLabel } from "@/lib/utils/date";
+import { minutesToCompactTick, minutesToHoursLabel } from "@/lib/utils/date";
 import type { BlockMinutes } from "@/lib/services/stats.service";
 
 interface BlockTimeChartProps {
@@ -29,9 +29,10 @@ export function BlockTimeChart({ data }: BlockTimeChartProps) {
             <CartesianGrid horizontal={false} stroke="var(--border)" />
             <XAxis
               type="number"
-              tickFormatter={(v: number) => minutesToHoursLabel(v)}
+              tickFormatter={(v: number) => minutesToCompactTick(v)}
               tickLine={false}
               axisLine={false}
+              tick={{ fontSize: 11 }}
             />
             <YAxis
               dataKey="bloque"

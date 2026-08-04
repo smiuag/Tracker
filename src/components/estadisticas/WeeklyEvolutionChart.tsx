@@ -3,7 +3,7 @@
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
 import { SectionCard } from "@/components/shared/SectionCard";
 import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from "@/components/ui/chart";
-import { minutesToHoursLabel } from "@/lib/utils/date";
+import { minutesToCompactTick, minutesToHoursLabel } from "@/lib/utils/date";
 import type { WeekMinutes } from "@/lib/services/stats.service";
 
 interface WeeklyEvolutionChartProps {
@@ -28,10 +28,11 @@ export function WeeklyEvolutionChart({ data }: WeeklyEvolutionChartProps) {
             <CartesianGrid vertical={false} stroke="var(--border)" />
             <XAxis dataKey="semana" tickLine={false} axisLine={false} tick={{ fontSize: 11 }} />
             <YAxis
-              tickFormatter={(v: number) => minutesToHoursLabel(v)}
+              tickFormatter={(v: number) => minutesToCompactTick(v)}
               tickLine={false}
               axisLine={false}
-              width={56}
+              tick={{ fontSize: 11 }}
+              width={44}
             />
             <ChartTooltip
               content={<ChartTooltipContent formatter={(value) => minutesToHoursLabel(Number(value))} />}
