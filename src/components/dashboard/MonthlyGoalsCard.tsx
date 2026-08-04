@@ -10,18 +10,19 @@ interface MonthlyGoalsCardProps {
 }
 
 export function MonthlyGoalsCard({ monthMinutes, goalHours }: MonthlyGoalsCardProps) {
-  const action = (
-    <Link
-      href="/configuracion"
-      className="text-xs text-muted-foreground underline underline-offset-2 hover:text-foreground"
-    >
-      {goalHours ? "Ver todos" : "Configurar"}
-    </Link>
-  );
-
   if (!goalHours) {
     return (
-      <SectionCard title="Objetivo mensual" action={action}>
+      <SectionCard
+        title="Objetivo mensual"
+        action={
+          <Link
+            href="/configuracion"
+            className="text-xs text-muted-foreground underline underline-offset-2 hover:text-foreground"
+          >
+            Configurar
+          </Link>
+        }
+      >
         <div className="flex items-center gap-3">
           <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-secondary">
             <Target className="size-4 text-foreground" />
@@ -38,7 +39,7 @@ export function MonthlyGoalsCard({ monthMinutes, goalHours }: MonthlyGoalsCardPr
   const percentage = Math.round((monthMinutes / goalMinutes) * 100);
 
   return (
-    <SectionCard title="Objetivo mensual" action={action}>
+    <SectionCard title="Objetivo mensual">
       <p className="text-sm text-foreground">
         {minutesToHoursLabel(monthMinutes)} / {goalHours} h
       </p>

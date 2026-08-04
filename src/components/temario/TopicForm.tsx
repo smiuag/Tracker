@@ -6,7 +6,6 @@ import { Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Slider } from "@/components/ui/slider";
 import {
   Select,
   SelectContent,
@@ -38,7 +37,6 @@ export function TopicForm({ topic, blocks, onSaved, onDeleted }: TopicFormProps)
   const [newBlockName, setNewBlockName] = useState("");
   const [notas, setNotas] = useState(topic?.notas ?? "");
   const [estado, setEstado] = useState<EstadoTema>(topic?.estado ?? "pendiente");
-  const [porcentaje, setPorcentaje] = useState(topic?.porcentaje ?? 0);
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
@@ -64,7 +62,6 @@ export function TopicForm({ topic, blocks, onSaved, onDeleted }: TopicFormProps)
           blockId: finalBlockId,
           notas,
           estado,
-          porcentaje,
         });
         toast.success("Tema actualizado");
       } else {
@@ -167,16 +164,6 @@ export function TopicForm({ topic, blocks, onSaved, onDeleted }: TopicFormProps)
                 ))}
               </SelectContent>
             </Select>
-          </div>
-          <div>
-            <Label className="mb-1.5 text-xs font-medium text-muted-foreground">
-              Progreso: {porcentaje}%
-            </Label>
-            <Slider
-              value={[porcentaje]}
-              onValueChange={(v) => setPorcentaje(Array.isArray(v) ? v[0] : v)}
-              step={5}
-            />
           </div>
           <p className="text-sm text-muted-foreground">
             Tiempo invertido: {minutesToHoursLabel(topic.tiempoInvertidoMin)}

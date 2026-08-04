@@ -16,7 +16,7 @@ export function StatTile({ icon: Icon, label, value }: StatTileProps) {
         </span>
         <div className="min-w-0 flex-1">
           <p className="text-lg font-semibold leading-none text-foreground">{value}</p>
-          <p className="mt-1 truncate text-xs text-muted-foreground">{label}</p>
+          <p className="mt-1 text-xs leading-snug text-muted-foreground">{label}</p>
         </div>
       </CardContent>
     </Card>
