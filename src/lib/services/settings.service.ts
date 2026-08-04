@@ -1,11 +1,16 @@
 import { db } from "@/lib/db/db";
-import { fromFechaISO } from "@/lib/utils/date";
+import { addDays, fromFechaISO } from "@/lib/utils/date";
 import type { GoalConfig } from "@/types/settings";
 import type { FechaISO } from "@/types/common";
+
+export const BACKUP_REMINDER_INTERVAL_DAYS = 21;
 
 const GOAL_CONFIG_KEY = "goalConfig";
 const BLOCK_DURATION_KEY = "blockDurationMin";
 const LAST_SEEN_WEEK_KEY = "lastSeenWeekStart";
+const LAST_BACKUP_AT_KEY = "lastBackupAt";
+const NEXT_BACKUP_REMINDER_AT_KEY = "nextBackupReminderAt";
+const BACKUP_REMINDER_DISMISSED_KEY = "backupReminderDismissed";
 
 export const DEFAULT_GOAL_CONFIG: GoalConfig = {
   weekdaysMode: "todos",
@@ -43,6 +48,42 @@ export async function getLastSeenWeekStart(): Promise<FechaISO | null> {
 
 export async function setLastSeenWeekStart(weekStart: FechaISO): Promise<void> {
   await db.settings.put({ key: LAST_SEEN_WEEK_KEY, value: weekStart });
+}
+
+/** Fecha de la última exportación de copia de seguridad realizada por el usuario. */
+export async function getLastBackupAt(): Promise<FechaISO | null> {
+  const row = await db.settings.get(LAST_BACKUP_AT_KEY);
+  return (row?.value as FechaISO | undefined) ?? null;
+}
+
+export async function setLastBackupAt(fecha: FechaISO): Promise<void> {
+  await db.settings.put({ key: LAST_BACKUP_AT_KEY, value: fecha });
+}
+
+/** Próxima fecha en la que procede volver a mostrar el recordatorio de copia de seguridad. */
+export async function getNextBackupReminderAt(): Promise<FechaISO | null> {
+  const row = await db.settings.get(NEXT_BACKUP_REMINDER_AT_KEY);
+  return (row?.value as FechaISO | undefined) ?? null;
+}
+
+export async function setNextBackupReminderAt(fecha: FechaISO): Promise<void> {
+  await db.settings.put({ key: NEXT_BACKUP_REMINDER_AT_KEY, value: fecha });
+}
+
+export async function isBackupReminderDismissed(): Promise<boolean> {
+  const row = await db.settings.get(BACKUP_REMINDER_DISMISSED_KEY);
+  return (row?.value as boolean | undefined) ?? false;
+}
+
+/** El usuario ha elegido "No volver a recordar": no se vuelve a mostrar nunca más. */
+export async function dismissBackupReminderForever(): Promise<void> {
+  await db.settings.put({ key: BACKUP_REMINDER_DISMISSED_KEY, value: true });
+}
+
+/** Se llama tras cada exportación exitosa: reinicia el conteo del recordatorio. */
+export async function recordBackupExported(fecha: FechaISO): Promise<void> {
+  await setLastBackupAt(fecha);
+  await setNextBackupReminderAt(addDays(fecha, BACKUP_REMINDER_INTERVAL_DAYS));
 }
 
 /** Días de la semana (0 = lunes … 6 = domingo) en los que aplica el objetivo diario. */

@@ -12,7 +12,7 @@ export const ALL_BLOCKS_VALUE = "all";
 export function BlockFilterTabs({ blocks, value, onChange }: BlockFilterTabsProps) {
   return (
     <Tabs value={value} onValueChange={(v) => v && onChange(v)} className="min-w-0">
-      <TabsList className="w-full justify-start overflow-x-auto">
+      <TabsList className="w-full justify-start overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         <TabsTrigger value={ALL_BLOCKS_VALUE}>Todos</TabsTrigger>
         {blocks.map((block) => (
           <TabsTrigger key={block.id} value={block.id}>

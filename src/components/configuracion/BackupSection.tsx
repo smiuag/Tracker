@@ -6,6 +6,8 @@ import { Download, Upload } from "lucide-react";
 import { SectionCard } from "@/components/shared/SectionCard";
 import { Button } from "@/components/ui/button";
 import { downloadBackup, exportBackup, importBackup, parseBackupFile } from "@/lib/services/backup.service";
+import { recordBackupExported } from "@/lib/services/settings.service";
+import { toFechaISO } from "@/lib/utils/date";
 
 export function BackupSection() {
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -16,6 +18,7 @@ export function BackupSection() {
     try {
       const payload = await exportBackup();
       downloadBackup(payload);
+      await recordBackupExported(toFechaISO(new Date()));
       toast.success("Copia de seguridad descargada");
     } catch {
       toast.error("No se pudo exportar la copia de seguridad");
