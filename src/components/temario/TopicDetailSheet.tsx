@@ -28,7 +28,7 @@ export function TopicDetailSheet({ topic, block, blocks, onClose }: TopicDetailS
               <SheetDescription>{block?.nombre ?? "Sin bloque"}</SheetDescription>
             </SheetHeader>
             <div className="flex flex-col gap-4 overflow-y-auto px-4">
-              <TopicForm topic={topic} blocks={blocks} onSaved={onClose} onDeleted={onClose} />
+              <TopicForm key={topic.id} topic={topic} blocks={blocks} onSaved={onClose} onDeleted={onClose} />
             </div>
           </>
         )}

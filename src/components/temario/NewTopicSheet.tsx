@@ -31,7 +31,9 @@ export function NewTopicSheet({ blocks }: NewTopicSheetProps) {
           <SheetTitle>Nuevo tema</SheetTitle>
         </SheetHeader>
         <div className="px-4">
-          <TopicForm blocks={blocks} onSaved={() => setOpen(false)} />
+          {/* key: remonta el formulario en cada apertura para no arrastrar
+              el estado (título, notas…) de la creación anterior. */}
+          <TopicForm key={String(open)} blocks={blocks} onSaved={() => setOpen(false)} />
         </div>
       </SheetContent>
     </Sheet>

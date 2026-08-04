@@ -17,6 +17,8 @@ import {
 import { QuickNoteInput } from "@/components/hoy/QuickNoteInput";
 import { TOPIC_STATES, TOPIC_STATE_LABELS } from "@/lib/constants/topicStates";
 import { createBlock, createTopic, deleteTopic, updateTopic } from "@/lib/services/topics.service";
+import { useNextTopicNumber } from "@/hooks/useNextTopicNumber";
+import { composeTopicName } from "@/lib/utils/topicName";
 import { minutesToHoursLabel } from "@/lib/utils/date";
 import type { Block, Topic } from "@/types/topic";
 import type { EstadoTema } from "@/types/common";
@@ -40,9 +42,13 @@ export function TopicForm({ topic, blocks, onSaved, onDeleted }: TopicFormProps)
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
+  const nextNumero = useNextTopicNumber(!topic && blockId !== NEW_BLOCK_VALUE ? blockId : null);
+  const canSave = topic
+    ? Boolean(nombre.trim())
+    : blockId !== NEW_BLOCK_VALUE || Boolean(newBlockName.trim());
+
   async function handleSave() {
-    if (!nombre.trim()) return;
-    if (blockId === NEW_BLOCK_VALUE && !newBlockName.trim()) return;
+    if (!canSave) return;
 
     setSaving(true);
     try {
@@ -62,7 +68,11 @@ export function TopicForm({ topic, blocks, onSaved, onDeleted }: TopicFormProps)
         });
         toast.success("Tema actualizado");
       } else {
-        await createTopic({ nombre: nombre.trim(), blockId: finalBlockId, notas });
+        await createTopic({
+          nombre: composeTopicName(nextNumero, nombre),
+          blockId: finalBlockId,
+          notas,
+        });
         toast.success("Tema creado");
       }
       onSaved();
@@ -87,13 +97,17 @@ export function TopicForm({ topic, blocks, onSaved, onDeleted }: TopicFormProps)
     <div className="flex flex-col gap-4">
       <div>
         <Label htmlFor="topic-nombre" className="mb-1.5 text-xs font-medium text-muted-foreground">
-          Nombre
+          {topic ? "Nombre" : `Tema ${nextNumero}`}
         </Label>
         <Input
           id="topic-nombre"
           value={nombre}
           onChange={(e) => setNombre(e.target.value)}
-          placeholder="Tema 7. La organización territorial del Estado"
+          placeholder={
+            topic
+              ? "Tema 7. La organización territorial del Estado"
+              : "Título (opcional) · ej. La organización territorial del Estado"
+          }
         />
       </div>
 
@@ -174,7 +188,7 @@ export function TopicForm({ topic, blocks, onSaved, onDeleted }: TopicFormProps)
       <QuickNoteInput value={notas} onChange={setNotas} label="Notas" placeholder="Notas del tema…" />
 
       <div className="flex gap-2">
-        <Button onClick={handleSave} disabled={saving || !nombre.trim()}>
+        <Button onClick={handleSave} disabled={saving || !canSave}>
           {topic ? "Guardar cambios" : "Crear tema"}
         </Button>
         {topic && (

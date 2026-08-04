@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/sheet";
 import { TOPIC_STATES, TOPIC_STATE_LABELS } from "@/lib/constants/topicStates";
 import { createBlockWithTopics } from "@/lib/services/topics.service";
+import { composeTopicName } from "@/lib/utils/topicName";
 import { createId } from "@/lib/utils/id";
 import type { EstadoTema } from "@/types/common";
 
@@ -60,8 +61,7 @@ export function NewBlockSheet() {
     setRows((prev) => (prev.length > 1 ? prev.filter((row) => row.key !== key) : prev));
   }
 
-  const validRows = rows.filter((row) => row.nombre.trim());
-  const canSave = blockNombre.trim() && validRows.length > 0;
+  const canSave = Boolean(blockNombre.trim());
 
   async function handleSave() {
     if (!canSave) return;
@@ -69,14 +69,14 @@ export function NewBlockSheet() {
     try {
       await createBlockWithTopics(
         blockNombre.trim(),
-        validRows.map((row) => ({
-          nombre: row.nombre.trim(),
+        rows.map((row, index) => ({
+          nombre: composeTopicName(index + 1, row.nombre),
           estado: row.estado,
           tiempoInvertidoMin: Math.max(0, Math.round((Number(row.horas) || 0) * 60)),
           notas: row.notas.trim(),
         }))
       );
-      toast.success(`Bloque creado con ${validRows.length} tema${validRows.length === 1 ? "" : "s"}`);
+      toast.success(`Bloque creado con ${rows.length} tema${rows.length === 1 ? "" : "s"}`);
       resetForm();
       setOpen(false);
     } finally {
@@ -133,7 +133,7 @@ export function NewBlockSheet() {
                 <Input
                   value={row.nombre}
                   onChange={(e) => updateRow(row.key, { nombre: e.target.value })}
-                  placeholder="Tema 1. La Constitución Española de 1978"
+                  placeholder="Título (opcional) · ej. La Constitución Española de 1978"
                 />
                 <div className="grid grid-cols-2 gap-2">
                   <Select
