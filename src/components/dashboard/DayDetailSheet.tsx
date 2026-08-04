@@ -61,6 +61,31 @@ export function DayDetailSheet({ fecha, onClose }: DayDetailSheetProps) {
                 <p className="text-sm text-muted-foreground">Sin sesiones registradas este día.</p>
               )}
 
+              {detail?.dailyLog && (
+                <div className="flex flex-col gap-1.5 rounded-lg border border-border bg-secondary/30 p-3">
+                  <p className="text-sm font-medium text-foreground">Día terminado 🥇</p>
+                  <p className="flex items-center gap-1.5 text-sm text-foreground">
+                    Productividad
+                    <span className="flex gap-0.5" aria-label={`${detail.dailyLog.productividad} de 5`}>
+                      {([1, 2, 3, 4, 5] as const).map((n) => (
+                        <span
+                          key={n}
+                          className={
+                            n <= detail.dailyLog!.productividad
+                              ? "size-2.5 rounded-full bg-primary"
+                              : "size-2.5 rounded-full bg-secondary"
+                          }
+                          aria-hidden
+                        />
+                      ))}
+                    </span>
+                  </p>
+                  {detail.dailyLog.reflexion && (
+                    <p className="text-sm text-foreground">{detail.dailyLog.reflexion}</p>
+                  )}
+                </div>
+              )}
+
               {isPastDay && <AddPastSessionForm fecha={fecha} />}
 
               <DailyTaskChecklist fecha={fecha} />
