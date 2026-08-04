@@ -10,6 +10,7 @@ import { TopicList } from "./TopicList";
 import { NewBlockSheet } from "./NewBlockSheet";
 import { NewTopicSheet } from "./NewTopicSheet";
 import { TopicDetailSheet } from "./TopicDetailSheet";
+import { DeleteBlockButton } from "./DeleteBlockButton";
 import type { Topic } from "@/types/topic";
 
 export function TemarioView() {
@@ -32,11 +33,20 @@ export function TemarioView() {
   const filteredTopics = topics
     .filter((t) => selectedBlock === ALL_BLOCKS_VALUE || t.blockId === selectedBlock)
     .filter((t) => selectedEstado === ALL_STATES_VALUE || t.estado === selectedEstado);
+  const selectedBlockObj =
+    selectedBlock === ALL_BLOCKS_VALUE ? undefined : blocks.find((b) => b.id === selectedBlock);
 
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-col gap-3">
-        <div className="flex justify-end gap-2">
+        <div className="flex flex-wrap items-center justify-end gap-2">
+          {selectedBlockObj && (
+            <DeleteBlockButton
+              block={selectedBlockObj}
+              topicCount={topics.filter((t) => t.blockId === selectedBlockObj.id).length}
+              onDeleted={() => setSelectedBlock(ALL_BLOCKS_VALUE)}
+            />
+          )}
           {blocks.length > 0 && <NewTopicSheet blocks={blocks} />}
           <NewBlockSheet />
         </div>

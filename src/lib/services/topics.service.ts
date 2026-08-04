@@ -104,6 +104,16 @@ export async function deleteTopic(id: string): Promise<void> {
   });
 }
 
+/** Elimina un bloque junto con todos sus temas y subtemas (p. ej. uno creado por error). */
+export async function deleteBlock(id: string): Promise<void> {
+  await db.transaction("rw", db.blocks, db.topics, db.subtopics, async () => {
+    const topicIds = await db.topics.where("blockId").equals(id).primaryKeys();
+    await db.subtopics.where("topicId").anyOf(topicIds).delete();
+    await db.topics.where("blockId").equals(id).delete();
+    await db.blocks.delete(id);
+  });
+}
+
 export async function listSubtopics(topicId: string): Promise<Subtopic[]> {
   return db.subtopics.where("topicId").equals(topicId).sortBy("orden");
 }
