@@ -40,13 +40,6 @@ export function TemarioView() {
     <div className="flex flex-col gap-4">
       <div className="flex flex-col gap-3">
         <div className="flex flex-wrap items-center justify-end gap-2">
-          {selectedBlockObj && (
-            <DeleteBlockButton
-              block={selectedBlockObj}
-              topicCount={topics.filter((t) => t.blockId === selectedBlockObj.id).length}
-              onDeleted={() => setSelectedBlock(ALL_BLOCKS_VALUE)}
-            />
-          )}
           {blocks.length > 0 && <NewTopicSheet blocks={blocks} />}
           <NewBlockSheet />
         </div>
@@ -55,6 +48,16 @@ export function TemarioView() {
       </div>
 
       <TopicList topics={filteredTopics} blocks={blocks} onSelect={setSelectedTopic} />
+
+      {selectedBlockObj && (
+        <div className="flex justify-end">
+          <DeleteBlockButton
+            block={selectedBlockObj}
+            topicCount={topics.filter((t) => t.blockId === selectedBlockObj.id).length}
+            onDeleted={() => setSelectedBlock(ALL_BLOCKS_VALUE)}
+          />
+        </div>
+      )}
 
       <TopicDetailSheet
         topic={selectedTopic ? topics.find((t) => t.id === selectedTopic.id) ?? null : null}
