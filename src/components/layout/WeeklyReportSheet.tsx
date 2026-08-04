@@ -41,7 +41,7 @@ export function WeeklyReportSheet() {
           <SheetDescription>Así te fue la semana pasada</SheetDescription>
         </SheetHeader>
         {report && (
-          <div className="flex flex-col gap-4 px-4">
+          <div className="flex flex-col gap-4 overflow-y-auto px-4 pb-6">
             <div className="grid grid-cols-3 gap-3">
               <div className="rounded-xl bg-secondary/40 p-3 text-center">
                 <p className="text-lg font-semibold text-foreground">

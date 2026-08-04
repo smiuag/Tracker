@@ -33,7 +33,7 @@ export function DayDetailSheet({ fecha, onClose }: DayDetailSheetProps) {
                 {detail ? minutesToHoursLabel(detail.totalMinutes) : "Cargando…"}
               </SheetDescription>
             </SheetHeader>
-            <div className="flex flex-col gap-4 overflow-y-auto px-4">
+            <div className="flex flex-col gap-4 overflow-y-auto px-4 pb-6">
               {detail && detail.sessions.length > 0 ? (
                 <ul className="flex flex-col gap-2">
                   {detail.sessions.map((session) => (

@@ -100,7 +100,7 @@ export function NewBlockSheet() {
         <SheetHeader>
           <SheetTitle>Nuevo bloque</SheetTitle>
         </SheetHeader>
-        <div className="flex flex-col gap-4 overflow-y-auto px-4">
+        <div className="flex flex-col gap-4 overflow-y-auto px-4 pb-6">
           <div>
             <Label htmlFor="block-nombre" className="mb-1.5 text-xs font-medium text-muted-foreground">
               Nombre del bloque
