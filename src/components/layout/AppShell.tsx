@@ -4,6 +4,7 @@ import { BottomNav } from "./BottomNav";
 import { DbInitializer } from "./DbInitializer";
 import { WeeklyReportSheet } from "./WeeklyReportSheet";
 import { BackupReminderSheet } from "./BackupReminderSheet";
+import { UpdateAvailableToast } from "./UpdateAvailableToast";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 
@@ -14,6 +15,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         <DbInitializer />
         <WeeklyReportSheet />
         <BackupReminderSheet />
+        <UpdateAvailableToast />
         <SideNav />
         {/* min-w-0: sin él, el contenido ancho (p. ej. las pestañas de bloques)
             ensancha el layout entero en vez de hacer scroll interno. */}
