@@ -40,6 +40,11 @@ export function StreakBadge({ streak, streakDays, consecutiveActiveWeeks }: Stre
             ))}
           </div>
         )}
+        {streak > 0 && (
+          <p className="text-xs text-muted-foreground">
+            Estudia, repasa o lee 30 minutos para no perder tu racha
+          </p>
+        )}
       </CardContent>
     </Card>
   );

@@ -20,6 +20,7 @@ interface ConfiguracionFormProps {
 
 export function ConfiguracionForm({ goalConfig: initialGoalConfig, blockDurationMin }: ConfiguracionFormProps) {
   const [goalConfig, setLocalGoalConfig] = useState<GoalConfig>(initialGoalConfig);
+  const [hoursPerDay, setHoursPerDay] = useState(String(initialGoalConfig.hoursPerDay));
   const [blockDuration, setLocalBlockDuration] = useState(String(blockDurationMin));
   const [saving, setSaving] = useState(false);
 
@@ -38,7 +39,7 @@ export function ConfiguracionForm({ goalConfig: initialGoalConfig, blockDuration
   async function handleSave() {
     setSaving(true);
     try {
-      await setGoalConfig(goalConfig);
+      await setGoalConfig({ ...goalConfig, hoursPerDay: Math.max(0, Number(hoursPerDay) || 0) });
       await setBlockDurationMin(Math.max(1, Number(blockDuration) || DEFAULT_BLOCK_DURATION_MIN));
       toast.success("Configuración guardada");
     } finally {
@@ -102,10 +103,8 @@ export function ConfiguracionForm({ goalConfig: initialGoalConfig, blockDuration
                 type="number"
                 min={0}
                 step={0.5}
-                value={goalConfig.hoursPerDay}
-                onChange={(e) =>
-                  setLocalGoalConfig((prev) => ({ ...prev, hoursPerDay: Number(e.target.value) }))
-                }
+                value={hoursPerDay}
+                onChange={(e) => setHoursPerDay(e.target.value)}
               />
             </div>
             <div>

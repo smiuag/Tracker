@@ -8,6 +8,7 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { DailyTaskChecklist } from "@/components/hoy/DailyTaskChecklist";
+import { AddPastSessionForm } from "./AddPastSessionForm";
 import { useDayDetail } from "@/hooks/useDayDetail";
 import { minutesToHoursLabel } from "@/lib/utils/date";
 import type { FechaISO } from "@/types/common";
@@ -58,6 +59,8 @@ export function DayDetailSheet({ fecha, onClose }: DayDetailSheetProps) {
               ) : (
                 <p className="text-sm text-muted-foreground">Sin sesiones registradas este día.</p>
               )}
+
+              <AddPastSessionForm fecha={fecha} />
 
               <DailyTaskChecklist fecha={fecha} />
             </div>
