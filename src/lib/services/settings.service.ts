@@ -5,12 +5,14 @@ import type { FechaISO } from "@/types/common";
 
 const GOAL_CONFIG_KEY = "goalConfig";
 const BLOCK_DURATION_KEY = "blockDurationMin";
+const LAST_SEEN_WEEK_KEY = "lastSeenWeekStart";
 
 export const DEFAULT_GOAL_CONFIG: GoalConfig = {
   weekdaysMode: "todos",
   customWeekdays: [],
   hoursPerDay: 0,
   topicsPerWeek: null,
+  fechaExamen: null,
 };
 
 export const DEFAULT_BLOCK_DURATION_MIN = 30;
@@ -31,6 +33,16 @@ export async function getBlockDurationMin(): Promise<number> {
 
 export async function setBlockDurationMin(minutes: number): Promise<void> {
   await db.settings.put({ key: BLOCK_DURATION_KEY, value: minutes });
+}
+
+/** Lunes de la última semana en la que se abrió la app (para el informe semanal emergente). */
+export async function getLastSeenWeekStart(): Promise<FechaISO | null> {
+  const row = await db.settings.get(LAST_SEEN_WEEK_KEY);
+  return (row?.value as FechaISO | undefined) ?? null;
+}
+
+export async function setLastSeenWeekStart(weekStart: FechaISO): Promise<void> {
+  await db.settings.put({ key: LAST_SEEN_WEEK_KEY, value: weekStart });
 }
 
 /** Días de la semana (0 = lunes … 6 = domingo) en los que aplica el objetivo diario. */

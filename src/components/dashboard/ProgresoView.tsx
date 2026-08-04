@@ -4,6 +4,7 @@ import { CheckCircle2, LayoutDashboard, ListTodo, Target } from "lucide-react";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { StatTile } from "@/components/shared/StatTile";
 import { useDashboardData } from "@/hooks/useDashboardData";
+import { ExamCountdownCard } from "./ExamCountdownCard";
 import { WeeklyHoursCard } from "./WeeklyHoursCard";
 import { StreakBadge } from "./StreakBadge";
 import { TopicProgressBar } from "./TopicProgressBar";
@@ -46,6 +47,8 @@ export function ProgresoView() {
 
   return (
     <div className="flex flex-col gap-4">
+      {data.fechaExamen && <ExamCountdownCard fechaExamen={data.fechaExamen} />}
+
       <TopicProgressBar breakdown={data.topicProgress} />
 
       <div className="grid gap-4 md:grid-cols-[2fr_1fr]">

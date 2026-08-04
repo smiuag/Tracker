@@ -35,16 +35,23 @@ export function DayDetailSheet({ fecha, onClose }: DayDetailSheetProps) {
               {detail && detail.sessions.length > 0 ? (
                 <ul className="flex flex-col gap-2">
                   {detail.sessions.map((session) => (
-                    <li key={session.id} className="flex items-center justify-between text-sm">
-                      <div className="min-w-0">
-                        <p className="truncate font-medium text-foreground">
-                          {session.topicNombre ?? "Sin tema"}
-                        </p>
-                        <p className="text-xs text-muted-foreground">{session.tipoLabel}</p>
+                    <li key={session.id} className="flex flex-col gap-1 text-sm">
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="min-w-0">
+                          <p className="truncate font-medium text-foreground">
+                            {session.topicNombre ?? "Sin tema"}
+                          </p>
+                          <p className="text-xs text-muted-foreground">{session.tipoLabel}</p>
+                        </div>
+                        <span className="shrink-0 text-xs text-muted-foreground">
+                          {minutesToHoursLabel(session.duracionMin)}
+                        </span>
                       </div>
-                      <span className="shrink-0 text-xs text-muted-foreground">
-                        {minutesToHoursLabel(session.duracionMin)}
-                      </span>
+                      {session.observaciones && (
+                        <p className="rounded-lg bg-secondary/40 p-2 text-xs text-foreground">
+                          {session.observaciones}
+                        </p>
+                      )}
                     </li>
                   ))}
                 </ul>

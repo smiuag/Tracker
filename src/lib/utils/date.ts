@@ -43,6 +43,12 @@ export function endOfMonth(fecha: FechaISO): FechaISO {
   return toFechaISO(new Date(date.getFullYear(), date.getMonth() + 1, 0));
 }
 
+/** Días naturales entre dos fechas ISO (positivo si `to` es posterior a `from`). */
+export function daysBetween(from: FechaISO, to: FechaISO): number {
+  const msPerDay = 24 * 60 * 60 * 1000;
+  return Math.round((fromFechaISO(to).getTime() - fromFechaISO(from).getTime()) / msPerDay);
+}
+
 export function minutesToHoursLabel(minutes: number): string {
   const hours = Math.floor(minutes / 60);
   const mins = minutes % 60;

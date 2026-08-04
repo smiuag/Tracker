@@ -5,17 +5,23 @@ import { SectionCard } from "@/components/shared/SectionCard";
 import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from "@/components/ui/chart";
 import { minutesToHoursLabel } from "@/lib/utils/date";
 import type { TopicMinutes } from "@/lib/services/stats.service";
+import type { Block } from "@/types/topic";
 
 interface HoursByTopicChartProps {
   data: TopicMinutes[];
+  blocks: Block[];
 }
 
 const chartConfig = {
   minutos: { label: "Tiempo invertido", color: "var(--primary)" },
 } satisfies ChartConfig;
 
-export function HoursByTopicChart({ data }: HoursByTopicChartProps) {
-  const chartData = data.map((d) => ({ tema: d.topic.nombre, minutos: d.minutos }));
+export function HoursByTopicChart({ data, blocks }: HoursByTopicChartProps) {
+  const blockById = new Map(blocks.map((b) => [b.id, b.nombre]));
+  const chartData = data.map((d) => ({
+    tema: `${blockById.get(d.topic.blockId) ?? "Sin bloque"} · ${d.topic.nombre}`,
+    minutos: d.minutos,
+  }));
 
   return (
     <SectionCard title="Horas por tema">
@@ -34,7 +40,7 @@ export function HoursByTopicChart({ data }: HoursByTopicChartProps) {
             <YAxis
               dataKey="tema"
               type="category"
-              width={140}
+              width={180}
               tickLine={false}
               axisLine={false}
               tick={{ fontSize: 12 }}

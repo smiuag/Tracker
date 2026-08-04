@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { toast } from "sonner";
+import { Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -15,7 +16,8 @@ import {
 } from "@/components/ui/select";
 import { QuickNoteInput } from "@/components/hoy/QuickNoteInput";
 import { TOPIC_STATES, TOPIC_STATE_LABELS } from "@/lib/constants/topicStates";
-import { createBlock, createTopic, updateTopic } from "@/lib/services/topics.service";
+import { createBlock, createTopic, deleteTopic, updateTopic } from "@/lib/services/topics.service";
+import { minutesToHoursLabel } from "@/lib/utils/date";
 import type { Block, Topic } from "@/types/topic";
 import type { EstadoTema } from "@/types/common";
 
@@ -25,9 +27,10 @@ interface TopicFormProps {
   topic?: Topic;
   blocks: Block[];
   onSaved: () => void;
+  onDeleted?: () => void;
 }
 
-export function TopicForm({ topic, blocks, onSaved }: TopicFormProps) {
+export function TopicForm({ topic, blocks, onSaved, onDeleted }: TopicFormProps) {
   const [nombre, setNombre] = useState(topic?.nombre ?? "");
   const [blockId, setBlockId] = useState(topic?.blockId ?? blocks[0]?.id ?? NEW_BLOCK_VALUE);
   const [newBlockName, setNewBlockName] = useState("");
@@ -35,6 +38,7 @@ export function TopicForm({ topic, blocks, onSaved }: TopicFormProps) {
   const [estado, setEstado] = useState<EstadoTema>(topic?.estado ?? "pendiente");
   const [porcentaje, setPorcentaje] = useState(topic?.porcentaje ?? 0);
   const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   async function handleSave() {
     if (!nombre.trim()) return;
@@ -64,6 +68,18 @@ export function TopicForm({ topic, blocks, onSaved }: TopicFormProps) {
       onSaved();
     } finally {
       setSaving(false);
+    }
+  }
+
+  async function handleDelete() {
+    if (!topic) return;
+    setDeleting(true);
+    try {
+      await deleteTopic(topic.id);
+      toast.success("Tema eliminado");
+      onDeleted?.();
+    } finally {
+      setDeleting(false);
     }
   }
 
@@ -148,14 +164,31 @@ export function TopicForm({ topic, blocks, onSaved }: TopicFormProps) {
               step={5}
             />
           </div>
+          <p className="text-sm text-muted-foreground">
+            Tiempo invertido: {minutesToHoursLabel(topic.tiempoInvertidoMin)}
+            {topic.ultimoEstudio && ` · Último estudio: ${topic.ultimoEstudio}`}
+          </p>
         </>
       )}
 
       <QuickNoteInput value={notas} onChange={setNotas} label="Notas" placeholder="Notas del tema…" />
 
-      <Button onClick={handleSave} disabled={saving || !nombre.trim()}>
-        {topic ? "Guardar cambios" : "Crear tema"}
-      </Button>
+      <div className="flex gap-2">
+        <Button onClick={handleSave} disabled={saving || !nombre.trim()}>
+          {topic ? "Guardar cambios" : "Crear tema"}
+        </Button>
+        {topic && (
+          <Button
+            variant="ghost"
+            className="gap-1.5 text-destructive"
+            onClick={handleDelete}
+            disabled={deleting}
+          >
+            <Trash2 className="size-3.5" />
+            Eliminar
+          </Button>
+        )}
+      </div>
     </div>
   );
 }

@@ -1,4 +1,5 @@
 import { SectionCard } from "@/components/shared/SectionCard";
+import { EditSessionSheet } from "./EditSessionSheet";
 import { STUDY_TYPE_LABELS } from "@/lib/constants/studyTypes";
 import { minutesToHoursLabel } from "@/lib/utils/date";
 import type { StudySession } from "@/types/session";
@@ -29,8 +30,9 @@ export function TodaySessionsList({ sessions, topics }: TodaySessionsListProps) 
                   {session.observaciones && ` · ${session.observaciones}`}
                 </p>
               </div>
-              <span className="shrink-0 text-sm text-muted-foreground">
+              <span className="flex shrink-0 items-center gap-1 text-sm text-muted-foreground">
                 {minutesToHoursLabel(session.duracionMin)}
+                <EditSessionSheet session={session} topics={topics} />
               </span>
             </li>
           ))}

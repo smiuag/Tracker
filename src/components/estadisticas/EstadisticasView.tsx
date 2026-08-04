@@ -4,6 +4,7 @@ import { BarChart3 } from "lucide-react";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { BlockTimeChart } from "@/components/dashboard/BlockTimeChart";
 import { useEstadisticasData } from "@/hooks/useEstadisticasData";
+import { useBlocks } from "@/hooks/useBlocks";
 import { StatsSummaryGrid } from "./StatsSummaryGrid";
 import { HoursByTopicChart } from "./HoursByTopicChart";
 import { HoursByTypeChart } from "./HoursByTypeChart";
@@ -11,6 +12,7 @@ import { WeeklyEvolutionChart } from "./WeeklyEvolutionChart";
 
 export function EstadisticasView() {
   const data = useEstadisticasData();
+  const blocks = useBlocks();
 
   if (!data) {
     return (
@@ -43,7 +45,7 @@ export function EstadisticasView() {
         goalsCompliance={data.goalsCompliance}
       />
       <WeeklyEvolutionChart data={data.weeklyEvolution} />
-      <HoursByTopicChart data={data.minutesByTopic} />
+      <HoursByTopicChart data={data.minutesByTopic} blocks={blocks ?? []} />
       <BlockTimeChart data={data.minutesByBlock} />
       <HoursByTypeChart data={data.minutesByType} />
     </div>

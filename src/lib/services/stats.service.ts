@@ -149,6 +149,8 @@ export async function getMinutesByBlock(): Promise<BlockMinutes[]> {
 export interface MonthDayOverview {
   fecha: FechaISO;
   minutos: number;
+  /** Minutos objetivo ese día (0 si el día no está previsto para estudiar). */
+  goalMinutes: number;
   topics: { nombre: string; color: string }[];
 }
 
@@ -158,11 +160,12 @@ export async function getMonthOverview(referenceDate: FechaISO): Promise<MonthDa
   const daysInMonth = new Date(year, month, 0).getDate();
   const monthPrefix = `${String(year).padStart(4, "0")}-${String(month).padStart(2, "0")}`;
 
-  const [aggregates, sessions, topics, blocks] = await Promise.all([
+  const [aggregates, sessions, topics, blocks, config] = await Promise.all([
     db.dailyAggregates.where("fecha").startsWith(monthPrefix).toArray(),
     db.studySessions.where("fecha").startsWith(monthPrefix).toArray(),
     db.topics.toArray(),
     db.blocks.toArray(),
+    getGoalConfig(),
   ]);
   const minutesByDate = new Map(aggregates.map((a) => [a.fecha, a.minutosTotales]));
   const topicById = new Map(topics.map((t) => [t.id, t]));
@@ -182,9 +185,12 @@ export async function getMonthOverview(referenceDate: FechaISO): Promise<MonthDa
   return Array.from({ length: daysInMonth }, (_, i) => {
     const fecha = `${monthPrefix}-${String(i + 1).padStart(2, "0")}`;
     const dayTopics = topicsByDate.get(fecha);
+    const goalMinutes =
+      config.hoursPerDay && isApplicableDay(config, fecha) ? config.hoursPerDay * 60 : 0;
     return {
       fecha,
       minutos: minutesByDate.get(fecha) ?? 0,
+      goalMinutes,
       topics: dayTopics ? Array.from(dayTopics, ([nombre, color]) => ({ nombre, color })) : [],
     };
   });
@@ -264,6 +270,40 @@ export async function getWeeklyEvolution(weeksBack: number, referenceDate: Fecha
     const weekStart = addDays(currentWeekStart, -(weeksBack - 1 - i) * 7);
     return { weekStart, minutos: totals.get(weekStart) ?? 0 };
   });
+}
+
+export interface WeeklyReport {
+  weekStart: FechaISO;
+  totalMinutes: number;
+  studyDays: number;
+  restDays: number;
+  topicNames: string[];
+}
+
+/** Resumen de una semana ISO completa (lunes a domingo), para el informe emergente. */
+export async function getWeeklyReport(weekStart: FechaISO): Promise<WeeklyReport> {
+  const dates = isoWeekDates(weekStart);
+  const [aggregates, sessions, topics] = await Promise.all([
+    db.dailyAggregates.where("fecha").anyOf(dates).toArray(),
+    db.studySessions.where("fecha").anyOf(dates).toArray(),
+    db.topics.toArray(),
+  ]);
+
+  const totalMinutes = aggregates.reduce((sum, a) => sum + a.minutosTotales, 0);
+  const studyDays = aggregates.filter((a) => a.minutosTotales > 0).length;
+  const restDays = dates.length - studyDays;
+
+  const topicById = new Map(topics.map((t) => [t.id, t.nombre]));
+  const topicNames = Array.from(
+    new Set(
+      sessions
+        .filter((s) => s.topicId)
+        .map((s) => topicById.get(s.topicId as string))
+        .filter((nombre): nombre is string => !!nombre)
+    )
+  );
+
+  return { weekStart, totalMinutes, studyDays, restDays, topicNames };
 }
 
 /** % de semanas ya cerradas (anteriores a la actual) en las que se cumplió el objetivo semanal configurado. */

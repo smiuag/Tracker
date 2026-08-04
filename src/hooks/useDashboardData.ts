@@ -3,7 +3,12 @@
 import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "@/lib/db/db";
 import { toFechaISO } from "@/lib/utils/date";
-import { getDailyGoalHours, getMonthlyGoalHours, getWeeklyGoalHours } from "@/lib/services/settings.service";
+import {
+  getDailyGoalHours,
+  getGoalConfig,
+  getMonthlyGoalHours,
+  getWeeklyGoalHours,
+} from "@/lib/services/settings.service";
 import {
   getConsecutiveActiveWeeks,
   getCurrentTopic,
@@ -37,6 +42,7 @@ export function useDashboardData() {
       minutesByBlock,
       weeklyGoalHours,
       monthlyGoalHours,
+      goalConfig,
     ] = await Promise.all([
       getWeeklyMinutes(today),
       getMonthMinutes(today),
@@ -52,6 +58,7 @@ export function useDashboardData() {
       getMinutesByBlock(),
       getWeeklyGoalHours(),
       getMonthlyGoalHours(today),
+      getGoalConfig(),
     ]);
 
     const currentTopicMinutesByType = currentTopic
@@ -75,6 +82,7 @@ export function useDashboardData() {
       minutesByBlock,
       weeklyGoalHours,
       monthlyGoalHours,
+      fechaExamen: goalConfig.fechaExamen,
     };
   }, []);
 }

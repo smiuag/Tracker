@@ -8,7 +8,6 @@ import { TodayGoalCard } from "./TodayGoalCard";
 import { DailyTaskChecklist } from "./DailyTaskChecklist";
 import { SessionRecorderCard } from "./SessionRecorderCard";
 import { TodaySessionsList } from "./TodaySessionsList";
-import { TodayTopicsList } from "./TodayTopicsList";
 import { EndOfDaySummarySheet } from "./EndOfDaySummarySheet";
 
 export function HoyView() {
@@ -31,7 +30,6 @@ export function HoyView() {
       <DailyTaskChecklist fecha={data.today} />
       <SessionRecorderCard />
       <TodaySessionsList sessions={data.sessions} topics={topics} />
-      <TodayTopicsList topics={topics} />
       <div className="flex justify-end">
         <EndOfDaySummarySheet
           fecha={data.today}

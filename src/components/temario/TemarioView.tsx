@@ -5,6 +5,7 @@ import { BookOpen } from "lucide-react";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { useTemarioData } from "@/hooks/useTemarioData";
 import { BlockFilterTabs, ALL_BLOCKS_VALUE } from "./BlockFilterTabs";
+import { EstadoFilterTabs, ALL_STATES_VALUE } from "./EstadoFilterTabs";
 import { TopicList } from "./TopicList";
 import { NewBlockSheet } from "./NewBlockSheet";
 import { NewTopicSheet } from "./NewTopicSheet";
@@ -14,6 +15,7 @@ import type { Topic } from "@/types/topic";
 export function TemarioView() {
   const data = useTemarioData();
   const [selectedBlock, setSelectedBlock] = useState(ALL_BLOCKS_VALUE);
+  const [selectedEstado, setSelectedEstado] = useState(ALL_STATES_VALUE);
   const [selectedTopic, setSelectedTopic] = useState<Topic | null>(null);
 
   if (!data) {
@@ -27,24 +29,19 @@ export function TemarioView() {
   }
 
   const { blocks, topics } = data;
-  const filteredTopics =
-    selectedBlock === ALL_BLOCKS_VALUE ? topics : topics.filter((t) => t.blockId === selectedBlock);
+  const filteredTopics = topics
+    .filter((t) => selectedBlock === ALL_BLOCKS_VALUE || t.blockId === selectedBlock)
+    .filter((t) => selectedEstado === ALL_STATES_VALUE || t.estado === selectedEstado);
 
   return (
     <div className="flex flex-col gap-4">
-      {/*
-        Grid en vez de flex: un track `minmax(0, 1fr)` se cabe de verdad al
-        espacio disponible aunque su contenido (las pestañas) sea más ancho,
-        cosa que "flex-1" solo no garantiza (los flex items no se encogen
-        por debajo del ancho de su contenido salvo min-width:0, y aun con
-        eso el resultado es frágil con contenido dinámico como los bloques).
-      */}
-      <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
-        <BlockFilterTabs blocks={blocks} value={selectedBlock} onChange={setSelectedBlock} />
-        <div className="flex shrink-0 gap-2">
+      <div className="flex flex-col gap-3">
+        <div className="flex justify-end gap-2">
           {blocks.length > 0 && <NewTopicSheet blocks={blocks} />}
           <NewBlockSheet />
         </div>
+        <BlockFilterTabs blocks={blocks} value={selectedBlock} onChange={setSelectedBlock} />
+        <EstadoFilterTabs value={selectedEstado} onChange={setSelectedEstado} />
       </div>
 
       <TopicList topics={filteredTopics} blocks={blocks} onSelect={setSelectedTopic} />

@@ -19,11 +19,12 @@ import type { Topic } from "@/types/topic";
 import type { TipoEstudio } from "@/types/common";
 
 interface BlockSessionRecorderProps {
-  topics: Topic[] | undefined;
+  topics: Topic[];
   topicId: string;
   setTopicId: (id: string) => void;
   tipo: TipoEstudio;
   observaciones: string;
+  canSave: boolean;
   onSaved: () => void;
 }
 
@@ -35,6 +36,7 @@ export function BlockSessionRecorder({
   setTopicId,
   tipo,
   observaciones,
+  canSave,
   onSaved,
 }: BlockSessionRecorderProps) {
   const blockDurationMin = useBlockDurationMin();
@@ -43,23 +45,23 @@ export function BlockSessionRecorder({
   const [nuevoTopicId, setNuevoTopicId] = useState<string>("none");
   const [saving, setSaving] = useState(false);
 
-  const hasTopic = topicId !== "none";
   const totalMinutes = blockCount * blockDurationMin;
 
   function handleAddBlock() {
+    if (!canSave) return;
     setBlockCount((c) => c + 1);
-    if (hasTopic) setConfirmStep("acabado");
+    setConfirmStep("acabado");
   }
 
   async function finalize(opts: { acabado: boolean; nuevoTopicId?: string }) {
-    if (blockCount === 0) return;
+    if (blockCount === 0 || topicId === "none") return;
     setSaving(true);
     try {
       const fin = new Date();
       const duracionMin = blockCount * blockDurationMin;
       const inicio = new Date(fin.getTime() - duracionMin * 60000);
       await createSession({
-        topicId: topicId === "none" ? null : topicId,
+        topicId,
         tipo,
         inicio: inicio.toISOString(),
         fin: fin.toISOString(),
@@ -68,7 +70,7 @@ export function BlockSessionRecorder({
         observaciones,
       });
 
-      if (opts.acabado && topicId !== "none") {
+      if (opts.acabado) {
         await updateTopic(topicId, { estado: "acabado" });
       }
       if (opts.nuevoTopicId) {
@@ -104,20 +106,20 @@ export function BlockSessionRecorder({
     }
   }
 
-  const pendingTopics = (topics ?? []).filter((t) => t.id !== topicId && t.estado === "pendiente");
+  const pendingTopics = topics.filter((t) => t.id !== topicId && t.estado === "pendiente");
 
   return (
     <div className="flex flex-col gap-3">
       <div className="flex items-center gap-3">
-        <Button onClick={handleAddBlock} disabled={saving} className="gap-1.5">
+        <Button onClick={handleAddBlock} disabled={saving || !canSave} className="gap-1.5">
           <Plus className="size-4" />
           Bloque de {blockDurationMin} min
         </Button>
-        <span className="text-sm text-muted-foreground">
-          {blockCount > 0
-            ? `${blockCount} bloque${blockCount === 1 ? "" : "s"} · ${minutesToHoursLabel(totalMinutes)}`
-            : "Aún no has añadido ningún bloque"}
-        </span>
+        {blockCount > 0 && (
+          <span className="text-sm text-muted-foreground">
+            {blockCount} bloque{blockCount === 1 ? "" : "s"} · {minutesToHoursLabel(totalMinutes)}
+          </span>
+        )}
       </div>
 
       {confirmStep === "acabado" && (
@@ -170,17 +172,6 @@ export function BlockSessionRecorder({
             </Button>
           </div>
         </div>
-      )}
-
-      {!hasTopic && blockCount > 0 && (
-        <Button
-          onClick={() => finalize({ acabado: false })}
-          disabled={saving}
-          variant="outline"
-          className="w-fit"
-        >
-          Guardar sesión
-        </Button>
       )}
     </div>
   );

@@ -171,6 +171,7 @@ export async function seedDatabaseIfEmpty(): Promise<void> {
     customWeekdays: [],
     hoursPerDay: 3,
     topicsPerWeek: null,
+    fechaExamen: null,
   };
 
   await db.transaction(

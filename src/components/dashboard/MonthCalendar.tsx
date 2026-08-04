@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { DayDetailSheet } from "./DayDetailSheet";
 import { useMonthOverview } from "@/hooks/useMonthOverview";
 import { fromFechaISO, toFechaISO } from "@/lib/utils/date";
-import { INTENSITY_BUCKET_CLASSES, minutesToIntensityBucket } from "@/lib/utils/colors";
+import { dayCellClass } from "@/lib/utils/colors";
 import { cn } from "@/lib/utils";
 import type { FechaISO } from "@/types/common";
 
@@ -78,7 +78,6 @@ export function MonthCalendar() {
           <div key={`blank-${i}`} />
         ))}
         {days?.map((day) => {
-          const bucket = minutesToIntensityBucket(day.minutos);
           const dayNumber = Number(day.fecha.split("-")[2]);
           const title =
             day.topics.length > 0
@@ -92,7 +91,7 @@ export function MonthCalendar() {
               title={title}
               className={cn(
                 "flex aspect-square flex-col items-center justify-center rounded-md text-xs text-foreground transition-transform hover:scale-105",
-                INTENSITY_BUCKET_CLASSES[bucket]
+                dayCellClass(day.minutos, day.goalMinutes)
               )}
             >
               {dayNumber}

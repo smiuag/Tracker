@@ -19,10 +19,13 @@ import { BlockSessionRecorder } from "./BlockSessionRecorder";
 import { QuickNoteInput } from "./QuickNoteInput";
 import { useSessionTimer } from "@/hooks/useSessionTimer";
 import { useTopics } from "@/hooks/useTopics";
+import { useBlocks } from "@/hooks/useBlocks";
 import { createSession } from "@/lib/services/sessions.service";
 import { toFechaISO } from "@/lib/utils/date";
 import { STUDY_TYPES, STUDY_TYPE_LABELS } from "@/lib/constants/studyTypes";
 import type { TipoEstudio } from "@/types/common";
+
+const NONE = "none";
 
 function formatElapsed(totalSeconds: number): string {
   const minutes = Math.floor(totalSeconds / 60);
@@ -31,15 +34,25 @@ function formatElapsed(totalSeconds: number): string {
 }
 
 export function SessionRecorderCard() {
+  const blocks = useBlocks();
   const topics = useTopics();
   const timer = useSessionTimer();
 
-  const [mode, setMode] = useState<"timer" | "manual" | "bloques">("timer");
-  const [topicId, setTopicId] = useState<string>("none");
+  const [mode, setMode] = useState<"timer" | "manual" | "bloques">("bloques");
+  const [blockId, setBlockId] = useState<string>(NONE);
+  const [topicId, setTopicId] = useState<string>(NONE);
   const [tipo, setTipo] = useState<TipoEstudio>("lectura");
   const [observaciones, setObservaciones] = useState("");
   const [manualMinutes, setManualMinutes] = useState("");
   const [saving, setSaving] = useState(false);
+
+  const blockTopics = (topics ?? []).filter((topic) => topic.blockId === blockId);
+  const canSave = blockId !== NONE && topicId !== NONE;
+
+  function handleBlockChange(next: string) {
+    setBlockId(next);
+    setTopicId(NONE);
+  }
 
   function resetFields() {
     setObservaciones("");
@@ -48,6 +61,7 @@ export function SessionRecorderCard() {
   }
 
   async function handleSave() {
+    if (!canSave) return;
     const fin = new Date();
     let inicio: Date;
     let duracionMin: number;
@@ -66,7 +80,7 @@ export function SessionRecorderCard() {
     setSaving(true);
     try {
       await createSession({
-        topicId: topicId === "none" ? null : topicId,
+        topicId,
         tipo,
         inicio: inicio.toISOString(),
         fin: fin.toISOString(),
@@ -100,25 +114,51 @@ export function SessionRecorderCard() {
           </ToggleGroupItem>
         </ToggleGroup>
 
-        <div className="grid gap-3 sm:grid-cols-2">
+        <div className="grid gap-3 sm:grid-cols-3">
+          <div>
+            <Label htmlFor="session-block" className="mb-1.5 text-xs font-medium text-muted-foreground">
+              Bloque
+            </Label>
+            <Select
+              value={blockId}
+              onValueChange={(v) => handleBlockChange(v ?? NONE)}
+              items={{
+                none: "Selecciona un bloque…",
+                ...Object.fromEntries((blocks ?? []).map((block) => [block.id, block.nombre])),
+              }}
+            >
+              <SelectTrigger id="session-block" className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">Selecciona un bloque…</SelectItem>
+                {blocks?.map((block) => (
+                  <SelectItem key={block.id} value={block.id}>
+                    {block.nombre}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
           <div>
             <Label htmlFor="session-topic" className="mb-1.5 text-xs font-medium text-muted-foreground">
               Tema
             </Label>
             <Select
               value={topicId}
-              onValueChange={(v) => setTopicId(v ?? "none")}
+              onValueChange={(v) => setTopicId(v ?? NONE)}
+              disabled={blockId === NONE}
               items={{
-                none: "Sin tema",
-                ...Object.fromEntries((topics ?? []).map((topic) => [topic.id, topic.nombre])),
+                none: "Selecciona un tema…",
+                ...Object.fromEntries(blockTopics.map((topic) => [topic.id, topic.nombre])),
               }}
             >
               <SelectTrigger id="session-topic" className="w-full">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="none">Sin tema</SelectItem>
-                {topics?.map((topic) => (
+                <SelectItem value="none">Selecciona un tema…</SelectItem>
+                {blockTopics.map((topic) => (
                   <SelectItem key={topic.id} value={topic.id}>
                     {topic.nombre}
                   </SelectItem>
@@ -157,12 +197,12 @@ export function SessionRecorderCard() {
               {formatElapsed(timer.elapsedSeconds)}
             </span>
             {timer.isRunning ? (
-              <Button onClick={handleSave} disabled={saving} className="gap-1.5">
+              <Button onClick={handleSave} disabled={saving || !canSave} className="gap-1.5">
                 <Square className="size-4" />
                 Detener y guardar
               </Button>
             ) : (
-              <Button onClick={timer.start} variant="outline" className="gap-1.5">
+              <Button onClick={timer.start} variant="outline" disabled={!canSave} className="gap-1.5">
                 <Play className="size-4" />
                 Iniciar
               </Button>
@@ -185,7 +225,7 @@ export function SessionRecorderCard() {
                 className="w-28"
               />
             </div>
-            <Button onClick={handleSave} disabled={saving || !manualMinutes}>
+            <Button onClick={handleSave} disabled={saving || !manualMinutes || !canSave}>
               Guardar sesión
             </Button>
           </div>
@@ -193,11 +233,12 @@ export function SessionRecorderCard() {
 
         {mode === "bloques" && (
           <BlockSessionRecorder
-            topics={topics}
+            topics={blockTopics}
             topicId={topicId}
             setTopicId={setTopicId}
             tipo={tipo}
             observaciones={observaciones}
+            canSave={canSave}
             onSaved={resetFields}
           />
         )}

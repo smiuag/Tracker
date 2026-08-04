@@ -133,6 +133,23 @@ export function ConfiguracionForm({ goalConfig: initialGoalConfig, blockDuration
         </div>
       </SectionCard>
 
+      <SectionCard title="Examen">
+        <div>
+          <Label htmlFor="fecha-examen" className="mb-1.5 text-xs font-medium text-muted-foreground">
+            Fecha del examen (opcional)
+          </Label>
+          <Input
+            id="fecha-examen"
+            type="date"
+            value={goalConfig.fechaExamen ?? ""}
+            onChange={(e) =>
+              setLocalGoalConfig((prev) => ({ ...prev, fechaExamen: e.target.value || null }))
+            }
+            className="w-48"
+          />
+        </div>
+      </SectionCard>
+
       <SectionCard title="Bloques de tiempo">
         <div>
           <Label htmlFor="block-duration" className="mb-1.5 text-xs font-medium text-muted-foreground">

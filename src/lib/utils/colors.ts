@@ -1,20 +1,11 @@
-/** Buckets de intensidad usados en el calendario tipo GitHub (Dashboard/Calendario). */
-export type IntensityBucket = "0h" | "1h" | "2h" | "4h" | "6h+";
-
-export function minutesToIntensityBucket(minutes: number): IntensityBucket {
-  const hours = minutes / 60;
-  if (hours <= 0) return "0h";
-  if (hours < 2) return "1h";
-  if (hours < 4) return "2h";
-  if (hours < 6) return "4h";
-  return "6h+";
+/**
+ * Color de cada celda del calendario mensual (Progreso), según el objetivo
+ * diario configurado: verde si se cumplió, naranja si se estudió pero no se
+ * llegó, tono base más oscuro si se estudió un día no previsto, y tono base
+ * si no hubo estudio.
+ */
+export function dayCellClass(minutos: number, goalMinutes: number): string {
+  if (minutos <= 0) return "bg-secondary/40";
+  if (goalMinutes <= 0) return "bg-secondary/80";
+  return minutos >= goalMinutes ? "bg-primary" : "bg-[#D9A15C]/70";
 }
-
-/** Clases Tailwind por bucket, usando la paleta de marca (más intenso = más horas). */
-export const INTENSITY_BUCKET_CLASSES: Record<IntensityBucket, string> = {
-  "0h": "bg-secondary/40",
-  "1h": "bg-primary/30",
-  "2h": "bg-primary/55",
-  "4h": "bg-primary/80",
-  "6h+": "bg-primary",
-};
