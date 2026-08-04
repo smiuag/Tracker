@@ -35,6 +35,9 @@ export const viewport: Viewport = {
   themeColor: "#CAD7C5",
   width: "device-width",
   initialScale: 1,
+  // Necesario para que env(safe-area-inset-*) devuelva valores reales en iOS
+  // (barra inferior y hojas reservan espacio sobre el gesto de inicio).
+  viewportFit: "cover",
 };
 
 export default function RootLayout({

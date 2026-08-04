@@ -20,7 +20,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         {/* min-w-0: sin él, el contenido ancho (p. ej. las pestañas de bloques)
             ensancha el layout entero en vez de hacer scroll interno. */}
         <div className="flex min-h-full min-w-0 flex-1 flex-col">
-          <main className="flex-1 px-4 pb-24 pt-6 md:px-8 md:pb-10 md:pt-8">
+          <main className="flex-1 px-4 pb-[calc(6rem+env(safe-area-inset-bottom))] pt-6 md:px-8 md:pb-10 md:pt-8">
             <div className="mx-auto w-full max-w-5xl">{children}</div>
           </main>
           <BottomNav />

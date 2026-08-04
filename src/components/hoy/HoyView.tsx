@@ -4,6 +4,7 @@ import { Sun } from "lucide-react";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { useTodayData } from "@/hooks/useTodayData";
 import { useTopics } from "@/hooks/useTopics";
+import { useBlocks } from "@/hooks/useBlocks";
 import { TodayGoalCard } from "./TodayGoalCard";
 import { DailyTaskChecklist } from "./DailyTaskChecklist";
 import { SessionRecorderCard } from "./SessionRecorderCard";
@@ -13,6 +14,7 @@ import { EndOfDaySummarySheet } from "./EndOfDaySummarySheet";
 export function HoyView() {
   const data = useTodayData();
   const topics = useTopics();
+  const blocks = useBlocks();
 
   if (!data) {
     return (
@@ -29,7 +31,7 @@ export function HoyView() {
       <TodayGoalCard totalMinutes={data.totalMinutes} goalHours={data.dailyGoalHours || null} />
       <DailyTaskChecklist fecha={data.today} />
       <SessionRecorderCard />
-      <TodaySessionsList sessions={data.sessions} topics={topics} />
+      <TodaySessionsList sessions={data.sessions} topics={topics} blocks={blocks} />
       <div className="flex justify-end">
         <EndOfDaySummarySheet
           fecha={data.today}

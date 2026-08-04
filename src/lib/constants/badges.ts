@@ -25,8 +25,8 @@ export const BADGE_CATALOG: BadgeDefinition[] = [
   },
 ];
 
-/** A partir de estos, se generan hitos cada +50h indefinidamente (200, 250, 300…). */
-export const HOUR_MILESTONE_BASE = [10, 50, 100, 150];
+/** Escalera fija de hitos de horas de estudio; se muestran todos como medallas. */
+export const HOUR_MILESTONE_BASE = [10, 50, 100, 150, 300, 500, 750, 1000];
 
 export function hourMilestoneLabel(hours: number): string {
   return `${hours} horas de estudio`;

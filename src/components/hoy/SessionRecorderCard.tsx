@@ -241,7 +241,6 @@ export function SessionRecorderCard() {
           <BlockSessionRecorder
             topics={blockTopics}
             topicId={topicId}
-            setTopicId={setTopicId}
             tipo={tipo}
             observaciones={observaciones}
             canSave={canSave}

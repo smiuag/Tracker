@@ -24,15 +24,16 @@ import { QuickNoteInput } from "./QuickNoteInput";
 import { deleteSession, updateSession } from "@/lib/services/sessions.service";
 import { STUDY_TYPES, STUDY_TYPE_LABELS } from "@/lib/constants/studyTypes";
 import type { StudySession } from "@/types/session";
-import type { Topic } from "@/types/topic";
+import type { Block, Topic } from "@/types/topic";
 import type { TipoEstudio } from "@/types/common";
 
 interface EditSessionSheetProps {
   session: StudySession;
   topics: Topic[] | undefined;
+  blocks: Block[] | undefined;
 }
 
-export function EditSessionSheet({ session, topics }: EditSessionSheetProps) {
+export function EditSessionSheet({ session, topics, blocks }: EditSessionSheetProps) {
   const [open, setOpen] = useState(false);
   const [topicId, setTopicId] = useState(session.topicId ?? "none");
   const [tipo, setTipo] = useState<TipoEstudio>(session.tipo);
@@ -52,6 +53,22 @@ export function EditSessionSheet({ session, topics }: EditSessionSheetProps) {
 
   const observacionesRequired = tipo === "otros";
   const canSave = !observacionesRequired || observaciones.trim().length > 0;
+
+  // Opciones agrupadas por bloque (en su orden del temario) y etiquetadas
+  // "Tema X · Bloque": hay temas con el mismo nombre en bloques distintos.
+  const blockById = new Map((blocks ?? []).map((b) => [b.id, b]));
+  const topicOptions = [...(topics ?? [])]
+    .sort(
+      (a, b) =>
+        (blockById.get(a.blockId)?.orden ?? 0) - (blockById.get(b.blockId)?.orden ?? 0)
+    )
+    .map((topic) => {
+      const block = blockById.get(topic.blockId);
+      return {
+        id: topic.id,
+        label: block ? `${topic.nombre} · ${block.nombre}` : topic.nombre,
+      };
+    });
 
   async function handleSave() {
     const minutes = Number(duracionMin);
@@ -101,7 +118,7 @@ export function EditSessionSheet({ session, topics }: EditSessionSheetProps) {
               onValueChange={(v) => setTopicId(v ?? "none")}
               items={{
                 none: "Sin tema",
-                ...Object.fromEntries((topics ?? []).map((topic) => [topic.id, topic.nombre])),
+                ...Object.fromEntries(topicOptions.map((o) => [o.id, o.label])),
               }}
             >
               <SelectTrigger className="w-full">
@@ -109,9 +126,9 @@ export function EditSessionSheet({ session, topics }: EditSessionSheetProps) {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="none">Sin tema</SelectItem>
-                {topics?.map((topic) => (
-                  <SelectItem key={topic.id} value={topic.id}>
-                    {topic.nombre}
+                {topicOptions.map((o) => (
+                  <SelectItem key={o.id} value={o.id}>
+                    {o.label}
                   </SelectItem>
                 ))}
               </SelectContent>

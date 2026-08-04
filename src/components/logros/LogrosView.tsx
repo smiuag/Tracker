@@ -8,14 +8,6 @@ import { useTotalMinutes } from "@/hooks/useTotalMinutes";
 import { BADGE_CATALOG, HOUR_MILESTONE_BASE, hourMilestoneLabel } from "@/lib/constants/badges";
 import { minutesToHoursLabel } from "@/lib/utils/date";
 
-function upcomingMilestones(totalHours: number): number[] {
-  const list = [...HOUR_MILESTONE_BASE];
-  for (let next = 200; next <= totalHours + 200; next += 50) {
-    list.push(next);
-  }
-  return list;
-}
-
 export function LogrosView() {
   const badges = useBadges();
   const totalMinutes = useTotalMinutes();
@@ -30,9 +22,8 @@ export function LogrosView() {
     countByTipo.set(badge.tipo, (countByTipo.get(badge.tipo) ?? 0) + 1);
   }
 
-  const milestones = upcomingMilestones(totalHours);
-  const earnedMilestones = milestones.filter((m) => countByTipo.has(`horas_${m}`));
-  const nextMilestone = milestones.find((m) => !countByTipo.has(`horas_${m}`));
+  const isMilestoneEarned = (m: number) => countByTipo.has(`horas_${m}`) || totalHours >= m;
+  const nextMilestone = HOUR_MILESTONE_BASE.find((m) => !isMilestoneEarned(m));
 
   return (
     <div className="flex flex-col gap-4">
@@ -51,20 +42,18 @@ export function LogrosView() {
       </SectionCard>
 
       <SectionCard title="Horas de estudio">
-        {earnedMilestones.length > 0 && (
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-            {earnedMilestones.map((m) => (
-              <BadgeCard
-                key={m}
-                nombre={hourMilestoneLabel(m)}
-                descripcion="Hito de horas de estudio efectivo"
-                earned
-              />
-            ))}
-          </div>
-        )}
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          {HOUR_MILESTONE_BASE.map((m) => (
+            <BadgeCard
+              key={m}
+              nombre={`${m} horas`}
+              earned={isMilestoneEarned(m)}
+              circleLabel={`${m}h`}
+            />
+          ))}
+        </div>
         {nextMilestone && (
-          <div className={earnedMilestones.length > 0 ? "mt-4" : undefined}>
+          <div className="mt-4">
             <p className="mb-1.5 text-xs text-muted-foreground">
               Próximo hito: {hourMilestoneLabel(nextMilestone)} — llevas {minutesToHoursLabel(totalMinutes)}
             </p>

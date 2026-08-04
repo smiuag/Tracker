@@ -88,12 +88,7 @@ export async function evaluateHourMilestones(fecha: FechaISO): Promise<void> {
   const sessions = await db.studySessions.toArray();
   const totalHours = sessions.reduce((sum, s) => sum + s.duracionMin, 0) / 60;
 
-  const thresholds = [...HOUR_MILESTONE_BASE];
-  for (let next = 200; next <= totalHours; next += 50) {
-    thresholds.push(next);
-  }
-
-  for (const threshold of thresholds) {
+  for (const threshold of HOUR_MILESTONE_BASE) {
     if (totalHours >= threshold) {
       await awardBadge(`horas_${threshold}`, null, fecha, `${threshold} horas de estudio efectivo`);
     }
