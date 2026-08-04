@@ -45,9 +45,9 @@ export function EstadisticasView() {
         goalsCompliance={data.goalsCompliance}
       />
       <WeeklyEvolutionChart data={data.weeklyEvolution} />
-      <HoursByTopicChart data={data.minutesByTopic} blocks={blocks ?? []} />
-      <BlockTimeChart data={data.minutesByBlock} />
       <HoursByTypeChart data={data.minutesByType} />
+      <BlockTimeChart data={data.minutesByBlock} />
+      <HoursByTopicChart data={data.minutesByTopic} blocks={blocks ?? []} />
     </div>
   );
 }
