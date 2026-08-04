@@ -1,17 +1,25 @@
 "use client";
 
+import { useRef } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { normalizePathname } from "@/lib/utils/path";
 import { NAV_ITEMS } from "./navItems";
 
+/** Tolerancia de movimiento (px) entre bajar y levantar el dedo para seguir
+ *  contando el gesto como pulsación. El reconocedor nativo de iOS es mucho
+ *  más estricto y descartaba toques con un micro-deslizamiento. */
+const TAP_SLOP_PX = 24;
+
 export function BottomNav() {
   const pathname = normalizePathname(usePathname());
+  const router = useRouter();
+  const touchStart = useRef<{ x: number; y: number } | null>(null);
 
   return (
     <nav
-      className="fixed inset-x-0 bottom-0 z-40 flex border-t border-border bg-card/95 pb-[env(safe-area-inset-bottom)] backdrop-blur supports-[backdrop-filter]:bg-card/80 md:hidden"
+      className="fixed inset-x-0 bottom-0 z-40 flex touch-none border-t border-border bg-card/95 pb-[env(safe-area-inset-bottom)] backdrop-blur supports-[backdrop-filter]:bg-card/80 md:hidden"
       aria-label="Navegación principal"
     >
       {NAV_ITEMS.map((item) => {
@@ -21,8 +29,27 @@ export function BottomNav() {
           <Link
             key={item.href}
             href={item.href}
+            onPointerDown={(e) => {
+              touchStart.current = { x: e.clientX, y: e.clientY };
+            }}
+            onPointerUp={(e) => {
+              const start = touchStart.current;
+              touchStart.current = null;
+              if (!start) return;
+              if (Math.hypot(e.clientX - start.x, e.clientY - start.y) <= TAP_SLOP_PX) {
+                router.push(item.href);
+              }
+            }}
+            onPointerCancel={() => {
+              touchStart.current = null;
+            }}
+            onClick={(e) => {
+              // La navegación táctil/ratón ya se hizo en pointerup; solo se
+              // deja pasar el click de teclado (Enter), que llega con detail 0.
+              if (e.detail > 0) e.preventDefault();
+            }}
             className={cn(
-              "flex flex-1 touch-manipulation flex-col items-center gap-1 py-2.5 text-[11px] font-medium transition-colors",
+              "flex flex-1 touch-none select-none flex-col items-center gap-1 py-2.5 text-[11px] font-medium transition-colors",
               active ? "text-foreground" : "text-muted-foreground"
             )}
           >

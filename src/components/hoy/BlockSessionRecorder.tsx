@@ -1,15 +1,19 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-import { Plus } from "lucide-react";
+import { Check, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { createSession } from "@/lib/services/sessions.service";
 import { updateTopic } from "@/lib/services/topics.service";
-import { toFechaISO } from "@/lib/utils/date";
+import { toFechaISO, minutesToHoursLabel } from "@/lib/utils/date";
 import { useBlockDurationMin } from "@/hooks/useBlockDurationMin";
 import type { Topic } from "@/types/topic";
 import type { TipoEstudio } from "@/types/common";
+
+/** Tras guardar, el botón desaparece este tiempo y reaparece con un fundido:
+ *  feedback claro de que la pulsación registró, y freno a dobles toques. */
+const COOLDOWN_MS = 2000;
 
 interface BlockSessionRecorderProps {
   topics: Topic[];
@@ -30,9 +34,17 @@ export function BlockSessionRecorder({
 }: BlockSessionRecorderProps) {
   const blockDurationMin = useBlockDurationMin();
   const [saving, setSaving] = useState(false);
+  const [justSaved, setJustSaved] = useState(false);
+  const cooldownTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (cooldownTimer.current) clearTimeout(cooldownTimer.current);
+    };
+  }, []);
 
   async function handleAddBlock() {
-    if (!canSave || saving) return;
+    if (!canSave || saving || justSaved) return;
     setSaving(true);
     try {
       const fin = new Date();
@@ -54,7 +66,9 @@ export function BlockSessionRecorder({
         await updateTopic(topicId, { estado: "en_progreso" });
       }
 
-      toast.success(`Bloque de ${blockDurationMin} min guardado`);
+      toast.success(`Bloque de ${minutesToHoursLabel(blockDurationMin)} guardado`);
+      setJustSaved(true);
+      cooldownTimer.current = setTimeout(() => setJustSaved(false), COOLDOWN_MS);
       onSaved();
     } finally {
       setSaving(false);
@@ -62,11 +76,22 @@ export function BlockSessionRecorder({
   }
 
   return (
-    <div className="flex items-center gap-3">
-      <Button onClick={handleAddBlock} disabled={saving || !canSave} className="gap-1.5">
-        <Plus className="size-4" />
-        Bloque de {blockDurationMin} min
-      </Button>
+    <div className="flex min-h-9 items-center gap-3">
+      {justSaved ? (
+        <span className="flex items-center gap-1.5 rounded-full bg-primary/40 px-4 py-2 text-sm font-medium text-foreground transition-opacity duration-300 starting:opacity-0">
+          <Check className="size-4" />
+          Bloque guardado
+        </span>
+      ) : (
+        <Button
+          onClick={handleAddBlock}
+          disabled={saving || !canSave}
+          className="gap-1.5 transition-opacity duration-700 starting:opacity-0"
+        >
+          <Plus className="size-4" />
+          Bloque de {blockDurationMin} min
+        </Button>
+      )}
     </div>
   );
 }

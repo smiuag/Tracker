@@ -56,3 +56,13 @@ export function minutesToHoursLabel(minutes: number): string {
   if (mins === 0) return `${hours} h`;
   return `${hours} h ${mins} min`;
 }
+
+/** Versión compacta para ticks de ejes de gráficos, donde "6 h 40 min" no
+ *  cabe y se parte en dos líneas: "40m", "5h", "6h40". */
+export function minutesToCompactTick(minutes: number): string {
+  const hours = Math.floor(minutes / 60);
+  const mins = Math.round(minutes % 60);
+  if (hours === 0) return `${mins}m`;
+  if (mins === 0) return `${hours}h`;
+  return `${hours}h${String(mins).padStart(2, "0")}`;
+}
