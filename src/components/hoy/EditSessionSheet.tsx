@@ -55,7 +55,7 @@ export function EditSessionSheet({ session, topics, blocks }: EditSessionSheetPr
   const canSave = !observacionesRequired || observaciones.trim().length > 0;
 
   // Opciones agrupadas por bloque (en su orden del temario) y etiquetadas
-  // "Tema X · Bloque": hay temas con el mismo nombre en bloques distintos.
+  // "Bloque · Tema X": hay temas con el mismo nombre en bloques distintos.
   const blockById = new Map((blocks ?? []).map((b) => [b.id, b]));
   const topicOptions = [...(topics ?? [])]
     .sort(
@@ -66,7 +66,7 @@ export function EditSessionSheet({ session, topics, blocks }: EditSessionSheetPr
       const block = blockById.get(topic.blockId);
       return {
         id: topic.id,
-        label: block ? `${topic.nombre} · ${block.nombre}` : topic.nombre,
+        label: block ? `${block.nombre} · ${topic.nombre}` : topic.nombre,
       };
     });
 
