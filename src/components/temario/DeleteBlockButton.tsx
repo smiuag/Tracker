@@ -47,7 +47,11 @@ export function DeleteBlockButton({ block, topicCount, onDeleted }: DeleteBlockB
   }
 
   return (
-    <Button variant="ghost" className="gap-1.5 text-destructive" onClick={() => setConfirming(true)}>
+    <Button
+      variant="ghost"
+      className="gap-1.5 border border-destructive/25 bg-destructive/10 text-destructive hover:bg-destructive/15 hover:text-destructive"
+      onClick={() => setConfirming(true)}
+    >
       <Trash2 className="size-3.5" />
       Eliminar bloque
     </Button>
