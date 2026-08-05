@@ -17,7 +17,7 @@ export function HoursByTypeChart({ data }: HoursByTypeChartProps) {
   return (
     <SectionCard title="Distribución por tipo de estudio">
       {data.length === 0 ? (
-        <p className="text-sm text-muted-foreground">Todavía no hay sesiones registradas.</p>
+        <p className="text-sm text-muted-foreground">No hay sesiones en este periodo.</p>
       ) : (
         <div className="flex items-center gap-4">
           <ChartContainer config={{}} className="aspect-square size-32 shrink-0">

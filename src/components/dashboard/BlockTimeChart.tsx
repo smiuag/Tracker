@@ -9,13 +9,17 @@ import type { BlockMinutes } from "@/lib/services/stats.service";
 
 interface BlockTimeChartProps {
   data: BlockMinutes[];
+  emptyMessage?: string;
 }
 
 const chartConfig = Object.fromEntries(
   STUDY_TYPES.map((tipo) => [tipo, { label: STUDY_TYPE_LABELS[tipo], color: STUDY_TYPE_COLORS[tipo] }])
 ) satisfies ChartConfig;
 
-export function BlockTimeChart({ data }: BlockTimeChartProps) {
+export function BlockTimeChart({
+  data,
+  emptyMessage = "Todavía no hay sesiones registradas por bloque.",
+}: BlockTimeChartProps) {
   const chartData = data.map((d) => ({
     bloque: d.block.nombre,
     ...d.porTipo,
@@ -70,9 +74,7 @@ export function BlockTimeChart({ data }: BlockTimeChartProps) {
           </BarChart>
         </ChartContainer>
       ) : (
-        <p className="text-sm text-muted-foreground">
-          Todavía no hay sesiones registradas por bloque.
-        </p>
+        <p className="text-sm text-muted-foreground">{emptyMessage}</p>
       )}
     </SectionCard>
   );

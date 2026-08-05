@@ -49,6 +49,11 @@ export function daysBetween(from: FechaISO, to: FechaISO): number {
   return Math.round((fromFechaISO(to).getTime() - fromFechaISO(from).getTime()) / msPerDay);
 }
 
+/** "28 jul" — etiqueta corta para ejes de gráficos. */
+export function formatShortDayMonth(fecha: FechaISO): string {
+  return fromFechaISO(fecha).toLocaleDateString("es-ES", { day: "numeric", month: "short" });
+}
+
 export function minutesToHoursLabel(minutes: number): string {
   const hours = Math.floor(minutes / 60);
   const mins = minutes % 60;

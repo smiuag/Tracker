@@ -49,7 +49,9 @@ export function BottomNav() {
               if (e.detail > 0) e.preventDefault();
             }}
             className={cn(
-              "flex flex-1 touch-none select-none flex-col items-center gap-1 py-2.5 text-[11px] font-medium transition-colors",
+              // [-webkit-touch-callout:none] evita el menú contextual de iOS
+              // (Abrir / Copiar enlace / Compartir…) al mantener pulsado el icono.
+              "flex flex-1 touch-none select-none flex-col items-center gap-1 py-2.5 text-[11px] font-medium transition-colors [-webkit-touch-callout:none]",
               active ? "text-foreground" : "text-muted-foreground"
             )}
           >

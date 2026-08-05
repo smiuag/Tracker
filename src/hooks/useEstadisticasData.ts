@@ -1,7 +1,7 @@
 "use client";
 
 import { useLiveQuery } from "dexie-react-hooks";
-import { toFechaISO } from "@/lib/utils/date";
+import { addDays, toFechaISO } from "@/lib/utils/date";
 import {
   getAverageWeeklyMinutes,
   getBestWeek,
@@ -11,16 +11,28 @@ import {
   getMinutesByType,
   getStreak,
   getTopicsCompletedCount,
+  getTotalMinutes,
   getWeeklyEvolution,
 } from "@/lib/services/stats.service";
 
 const WEEKS_BACK = 10;
 
-export function useEstadisticasData() {
+export type StatsPeriod = "todo" | "mes" | "semana";
+
+/** Primer día incluido en el periodo (ventana móvil), o sin límite para "todo". */
+function periodFromDate(period: StatsPeriod, today: string): string | undefined {
+  if (period === "semana") return addDays(today, -6);
+  if (period === "mes") return addDays(today, -29);
+  return undefined;
+}
+
+export function useEstadisticasData(period: StatsPeriod) {
   return useLiveQuery(async () => {
     const today = toFechaISO(new Date());
+    const fromDate = periodFromDate(period, today);
 
     const [
+      totalMinutes,
       streak,
       topicsCompleted,
       minutesByBlock,
@@ -31,18 +43,17 @@ export function useEstadisticasData() {
       goalsCompliance,
       weeklyEvolution,
     ] = await Promise.all([
+      getTotalMinutes(),
       getStreak(today),
       getTopicsCompletedCount(),
-      getMinutesByBlock(),
-      getMinutesByTopic(),
-      getMinutesByType(),
+      getMinutesByBlock(fromDate),
+      getMinutesByTopic(8, fromDate),
+      getMinutesByType(fromDate),
       getBestWeek(),
       getAverageWeeklyMinutes(),
       getGoalsCompliance(today),
       getWeeklyEvolution(WEEKS_BACK, today),
     ]);
-
-    const totalMinutes = minutesByBlock.reduce((sum, b) => sum + b.minutos, 0);
 
     return {
       totalMinutes,
@@ -56,5 +67,5 @@ export function useEstadisticasData() {
       goalsCompliance,
       weeklyEvolution,
     };
-  }, []);
+  }, [period]);
 }

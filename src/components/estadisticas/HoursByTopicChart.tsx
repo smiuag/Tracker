@@ -36,7 +36,7 @@ export function HoursByTopicChart({ data, blocks }: HoursByTopicChartProps) {
   return (
     <SectionCard title="Horas por tema">
       {chartData.length === 0 ? (
-        <p className="text-sm text-muted-foreground">Todavía no hay sesiones registradas.</p>
+        <p className="text-sm text-muted-foreground">No hay sesiones en este periodo.</p>
       ) : (
         <ChartContainer config={chartConfig} className="aspect-auto h-64 w-full">
           <BarChart data={chartData} layout="vertical" margin={{ left: 8, right: 8 }}>

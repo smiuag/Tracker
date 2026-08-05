@@ -1,6 +1,7 @@
 import { Flame } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
+import { dayCellClass } from "@/lib/utils/colors";
 import type { StreakDay } from "@/lib/services/stats.service";
 
 interface StreakBadgeProps {
@@ -35,7 +36,7 @@ export function StreakBadge({ streak, streakDays, consecutiveActiveWeeks }: Stre
               <span
                 key={day.fecha}
                 title={day.fecha}
-                className={cn("h-2.5 flex-1 rounded-full", day.goalMet ? "bg-primary" : "bg-accent")}
+                className={cn("h-2.5 flex-1 rounded-full", dayCellClass(day.minutos, day.goalMinutes))}
               />
             ))}
           </div>

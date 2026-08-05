@@ -1,9 +1,10 @@
 import { db } from "@/lib/db/db";
 import { addDays, isoWeekDates, startOfIsoWeek } from "@/lib/utils/date";
-import { dailyGoalHoursFor, getGoalConfig, weeklyGoalHoursFor } from "@/lib/services/settings.service";
-import { STUDY_TYPE_LABELS } from "@/lib/constants/studyTypes";
-import type { Block, Topic } from "@/types/topic";
-import type { FechaISO, TipoEstudio } from "@/types/common";
+import { dailyGoalHoursFor, getGoalConfig } from "@/lib/services/settings.service";
+import type { Topic } from "@/types/topic";
+import type { FechaISO } from "@/types/common";
+
+export * from "@/lib/services/minutes.service";
 
 export async function getWeeklyMinutes(referenceDate: FechaISO): Promise<number> {
   const dates = isoWeekDates(referenceDate);
@@ -39,10 +40,12 @@ export async function getStreak(referenceDate: FechaISO): Promise<number> {
 export interface StreakDay {
   fecha: FechaISO;
   minutos: number;
-  goalMet: boolean;
+  /** Minutos objetivo ese día (0 si el día no estaba previsto para estudiar). */
+  goalMinutes: number;
 }
 
-/** Días de la racha activa (orden cronológico), clasificados por si ese día se cumplió el objetivo. */
+/** Días de la racha activa (orden cronológico), con el objetivo de cada día
+ *  para poder colorearlos con la misma escala que el calendario. */
 export async function getStreakDetail(referenceDate: FechaISO): Promise<StreakDay[]> {
   const config = await getGoalConfig();
   const days: StreakDay[] = [];
@@ -51,9 +54,7 @@ export async function getStreakDetail(referenceDate: FechaISO): Promise<StreakDa
     const aggregate = await db.dailyAggregates.get(cursor);
     const minutos = aggregate?.minutosTotales ?? 0;
     if (minutos <= 0) break;
-    const goalHoras = dailyGoalHoursFor(config, cursor);
-    const goalMet = goalHoras > 0 && minutos >= goalHoras * 60;
-    days.push({ fecha: cursor, minutos, goalMet });
+    days.push({ fecha: cursor, minutos, goalMinutes: dailyGoalHoursFor(config, cursor) * 60 });
     cursor = addDays(cursor, -1);
   }
   return days.reverse();
@@ -110,56 +111,6 @@ export async function getCurrentTopic(): Promise<Topic | null> {
   return topics[0];
 }
 
-export async function getMinutesByTypeForTopic(topicId: string): Promise<TypeMinutes[]> {
-  const sessions = await db.studySessions.where("topicId").equals(topicId).toArray();
-  const minutesByType = new Map<TipoEstudio, number>();
-  for (const session of sessions) {
-    minutesByType.set(session.tipo, (minutesByType.get(session.tipo) ?? 0) + session.duracionMin);
-  }
-  return Array.from(minutesByType.entries())
-    .filter(([, minutos]) => minutos > 0)
-    .map(([tipo, minutos]) => ({ tipo, label: STUDY_TYPE_LABELS[tipo], minutos }))
-    .sort((a, b) => b.minutos - a.minutos);
-}
-
-/** Desglose de minutos por tipo de estudio, con todas las claves presentes. */
-export type MinutesPerTipo = Record<TipoEstudio, number>;
-
-function emptyPerTipo(): MinutesPerTipo {
-  return { lectura: 0, estudio: 0, test: 0, otros: 0 };
-}
-
-export interface BlockMinutes {
-  block: Block;
-  minutos: number;
-  porTipo: MinutesPerTipo;
-}
-
-export async function getMinutesByBlock(): Promise<BlockMinutes[]> {
-  const [blocks, topics, sessions] = await Promise.all([
-    db.blocks.toArray(),
-    db.topics.toArray(),
-    db.studySessions.toArray(),
-  ]);
-  const topicToBlock = new Map(topics.map((t) => [t.id, t.blockId]));
-  const perBlock = new Map<string, MinutesPerTipo>();
-  for (const session of sessions) {
-    if (!session.topicId) continue;
-    const blockId = topicToBlock.get(session.topicId);
-    if (!blockId) continue;
-    const acc = perBlock.get(blockId) ?? emptyPerTipo();
-    acc[session.tipo] += session.duracionMin;
-    perBlock.set(blockId, acc);
-  }
-  return [...blocks]
-    .sort((a, b) => a.orden - b.orden)
-    .map((block) => {
-      const porTipo = perBlock.get(block.id) ?? emptyPerTipo();
-      const minutos = porTipo.lectura + porTipo.estudio + porTipo.test + porTipo.otros;
-      return { block, minutos, porTipo };
-    });
-}
-
 export interface MonthDayOverview {
   fecha: FechaISO;
   minutos: number;
@@ -209,52 +160,6 @@ export async function getMonthOverview(referenceDate: FechaISO): Promise<MonthDa
   });
 }
 
-export interface TopicMinutes {
-  topic: Topic;
-  minutos: number;
-  porTipo: MinutesPerTipo;
-}
-
-/** Basado en sesiones (no en `tiempoInvertidoMin`) para poder desglosar por
- *  tipo de estudio con los mismos datos que el resto de gráficas. */
-export async function getMinutesByTopic(limit = 8): Promise<TopicMinutes[]> {
-  const [topics, sessions] = await Promise.all([db.topics.toArray(), db.studySessions.toArray()]);
-  const perTopic = new Map<string, MinutesPerTipo>();
-  for (const session of sessions) {
-    if (!session.topicId) continue;
-    const acc = perTopic.get(session.topicId) ?? emptyPerTipo();
-    acc[session.tipo] += session.duracionMin;
-    perTopic.set(session.topicId, acc);
-  }
-  return topics
-    .map((topic) => {
-      const porTipo = perTopic.get(topic.id) ?? emptyPerTipo();
-      const minutos = porTipo.lectura + porTipo.estudio + porTipo.test + porTipo.otros;
-      return { topic, minutos, porTipo };
-    })
-    .filter((t) => t.minutos > 0)
-    .sort((a, b) => b.minutos - a.minutos)
-    .slice(0, limit);
-}
-
-export interface TypeMinutes {
-  tipo: TipoEstudio;
-  label: string;
-  minutos: number;
-}
-
-export async function getMinutesByType(): Promise<TypeMinutes[]> {
-  const sessions = await db.studySessions.toArray();
-  const minutesByType = new Map<TipoEstudio, number>();
-  for (const session of sessions) {
-    minutesByType.set(session.tipo, (minutesByType.get(session.tipo) ?? 0) + session.duracionMin);
-  }
-  return Array.from(minutesByType.entries())
-    .filter(([, minutos]) => minutos > 0)
-    .map(([tipo, minutos]) => ({ tipo, label: STUDY_TYPE_LABELS[tipo], minutos }))
-    .sort((a, b) => b.minutos - a.minutos);
-}
-
 async function getWeeklyTotals(): Promise<Map<FechaISO, number>> {
   const aggregates = await db.dailyAggregates.toArray();
   const totalsByWeekStart = new Map<FechaISO, number>();
@@ -293,10 +198,14 @@ export async function getAverageWeeklyMinutes(): Promise<number> {
 export async function getWeeklyEvolution(weeksBack: number, referenceDate: FechaISO): Promise<WeekMinutes[]> {
   const totals = await getWeeklyTotals();
   const currentWeekStart = startOfIsoWeek(referenceDate);
-  return Array.from({ length: weeksBack }, (_, i) => {
+  const weeks = Array.from({ length: weeksBack }, (_, i) => {
     const weekStart = addDays(currentWeekStart, -(weeksBack - 1 - i) * 7);
     return { weekStart, minutos: totals.get(weekStart) ?? 0 };
   });
+  // La evolución empieza en la primera semana con actividad: las semanas
+  // vacías anteriores al inicio del estudio no aportan información.
+  const firstActive = weeks.findIndex((w) => w.minutos > 0);
+  return firstActive === -1 ? [] : weeks.slice(firstActive);
 }
 
 export interface WeeklyReport {
@@ -333,17 +242,28 @@ export async function getWeeklyReport(weekStart: FechaISO): Promise<WeeklyReport
   return { weekStart, totalMinutes, studyDays, restDays, topicNames };
 }
 
-/** % de semanas ya cerradas (anteriores a la actual) en las que se cumplió el objetivo semanal configurado. */
+/** % de días con objetivo diario (desde el primer día con actividad registrada) en los que
+ *  se cumplió ese objetivo. El día de hoy solo entra en el cómputo si ya está cumplido,
+ *  para no penalizar una jornada aún a medias. */
 export async function getGoalsCompliance(referenceDate: FechaISO): Promise<number> {
   const config = await getGoalConfig();
-  const weeklyTargetMinutes = weeklyGoalHoursFor(config) * 60;
-  if (weeklyTargetMinutes <= 0) return 0;
+  if (config.rules.length === 0) return 0;
 
-  const totals = await getWeeklyTotals();
-  const currentWeekStart = startOfIsoWeek(referenceDate);
-  const pastWeeks = [...totals.entries()].filter(([weekStart]) => weekStart < currentWeekStart);
-  if (pastWeeks.length === 0) return 0;
+  const aggregates = await db.dailyAggregates.toArray();
+  const minutesByDate = new Map(aggregates.map((a) => [a.fecha, a.minutosTotales]));
+  const activeDates = aggregates.filter((a) => a.minutosTotales > 0).map((a) => a.fecha);
+  if (activeDates.length === 0) return 0;
+  const firstDate = activeDates.reduce((min, fecha) => (fecha < min ? fecha : min));
 
-  const met = pastWeeks.filter(([, minutos]) => minutos >= weeklyTargetMinutes).length;
-  return Math.round((met / pastWeeks.length) * 100);
+  let applicable = 0;
+  let met = 0;
+  for (let fecha = firstDate; fecha <= referenceDate; fecha = addDays(fecha, 1)) {
+    const goalMinutes = dailyGoalHoursFor(config, fecha) * 60;
+    if (goalMinutes <= 0) continue;
+    const isMet = (minutesByDate.get(fecha) ?? 0) >= goalMinutes;
+    if (fecha === referenceDate && !isMet) continue;
+    applicable += 1;
+    if (isMet) met += 1;
+  }
+  return applicable === 0 ? 0 : Math.round((met / applicable) * 100);
 }

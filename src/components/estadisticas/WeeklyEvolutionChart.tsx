@@ -3,7 +3,7 @@
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
 import { SectionCard } from "@/components/shared/SectionCard";
 import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from "@/components/ui/chart";
-import { minutesToCompactTick, minutesToHoursLabel } from "@/lib/utils/date";
+import { formatShortDayMonth, minutesToCompactTick, minutesToHoursLabel } from "@/lib/utils/date";
 import type { WeekMinutes } from "@/lib/services/stats.service";
 
 interface WeeklyEvolutionChartProps {
@@ -15,18 +15,23 @@ const chartConfig = {
 } satisfies ChartConfig;
 
 export function WeeklyEvolutionChart({ data }: WeeklyEvolutionChartProps) {
-  const chartData = data.map((d) => ({ semana: d.weekStart.slice(5), minutos: d.minutos }));
-  const hasData = chartData.some((d) => d.minutos > 0);
+  const chartData = data.map((d) => ({ semana: formatShortDayMonth(d.weekStart), minutos: d.minutos }));
 
   return (
     <SectionCard title="Evolución semanal">
-      {!hasData ? (
+      {chartData.length === 0 ? (
         <p className="text-sm text-muted-foreground">Todavía no hay suficientes semanas con datos.</p>
       ) : (
         <ChartContainer config={chartConfig} className="aspect-auto h-56 w-full">
           <BarChart data={chartData} margin={{ left: 8, right: 8 }}>
             <CartesianGrid vertical={false} stroke="var(--border)" />
-            <XAxis dataKey="semana" tickLine={false} axisLine={false} tick={{ fontSize: 11 }} />
+            <XAxis
+              dataKey="semana"
+              tickLine={false}
+              axisLine={false}
+              tick={{ fontSize: 11 }}
+              interval={chartData.length > 6 ? 1 : 0}
+            />
             <YAxis
               tickFormatter={(v: number) => minutesToCompactTick(v)}
               tickLine={false}
@@ -35,9 +40,14 @@ export function WeeklyEvolutionChart({ data }: WeeklyEvolutionChartProps) {
               width={44}
             />
             <ChartTooltip
-              content={<ChartTooltipContent formatter={(value) => minutesToHoursLabel(Number(value))} />}
+              content={
+                <ChartTooltipContent
+                  labelFormatter={(label) => <>Semana del {label}</>}
+                  formatter={(value) => minutesToHoursLabel(Number(value))}
+                />
+              }
             />
-            <Bar dataKey="minutos" fill="var(--color-minutos)" radius={6} />
+            <Bar dataKey="minutos" fill="var(--color-minutos)" radius={6} maxBarSize={48} />
           </BarChart>
         </ChartContainer>
       )}
