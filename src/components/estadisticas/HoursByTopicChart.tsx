@@ -5,6 +5,7 @@ import { SectionCard } from "@/components/shared/SectionCard";
 import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from "@/components/ui/chart";
 import { minutesToCompactTick, minutesToHoursLabel } from "@/lib/utils/date";
 import { parseTopicNumber } from "@/lib/utils/topicName";
+import { STUDY_TYPES, STUDY_TYPE_COLORS, STUDY_TYPE_LABELS } from "@/lib/constants/studyTypes";
 import type { TopicMinutes } from "@/lib/services/stats.service";
 import type { Block } from "@/types/topic";
 
@@ -13,9 +14,9 @@ interface HoursByTopicChartProps {
   blocks: Block[];
 }
 
-const chartConfig = {
-  minutos: { label: "Tiempo invertido", color: "var(--primary)" },
-} satisfies ChartConfig;
+const chartConfig = Object.fromEntries(
+  STUDY_TYPES.map((tipo) => [tipo, { label: STUDY_TYPE_LABELS[tipo], color: STUDY_TYPE_COLORS[tipo] }])
+) satisfies ChartConfig;
 
 export function HoursByTopicChart({ data, blocks }: HoursByTopicChartProps) {
   const blockById = new Map(blocks.map((b) => [b.id, b]));
@@ -29,7 +30,7 @@ export function HoursByTopicChart({ data, blocks }: HoursByTopicChartProps) {
     })
     .map((d) => ({
       tema: `${blockById.get(d.topic.blockId)?.nombre ?? "Sin bloque"} · ${d.topic.nombre}`,
-      minutos: d.minutos,
+      ...d.porTipo,
     }));
 
   return (
@@ -56,9 +57,29 @@ export function HoursByTopicChart({ data, blocks }: HoursByTopicChartProps) {
               tick={{ fontSize: 12 }}
             />
             <ChartTooltip
-              content={<ChartTooltipContent formatter={(value) => minutesToHoursLabel(Number(value))} />}
+              content={
+                <ChartTooltipContent
+                  formatter={(value, name, item) =>
+                    Number(value) > 0 ? (
+                      <span className="flex w-full items-center justify-between gap-3">
+                        <span className="flex items-center gap-1.5 text-muted-foreground">
+                          <span
+                            className="size-2 rounded-full"
+                            style={{ backgroundColor: item?.color }}
+                            aria-hidden
+                          />
+                          {chartConfig[name as keyof typeof chartConfig]?.label ?? name}
+                        </span>
+                        <span className="text-foreground">{minutesToHoursLabel(Number(value))}</span>
+                      </span>
+                    ) : null
+                  }
+                />
+              }
             />
-            <Bar dataKey="minutos" fill="var(--color-minutos)" radius={6} />
+            {STUDY_TYPES.map((tipo) => (
+              <Bar key={tipo} dataKey={tipo} stackId="tipo" fill={STUDY_TYPE_COLORS[tipo]} />
+            ))}
           </BarChart>
         </ChartContainer>
       )}

@@ -122,9 +122,17 @@ export async function getMinutesByTypeForTopic(topicId: string): Promise<TypeMin
     .sort((a, b) => b.minutos - a.minutos);
 }
 
+/** Desglose de minutos por tipo de estudio, con todas las claves presentes. */
+export type MinutesPerTipo = Record<TipoEstudio, number>;
+
+function emptyPerTipo(): MinutesPerTipo {
+  return { lectura: 0, estudio: 0, test: 0, otros: 0 };
+}
+
 export interface BlockMinutes {
   block: Block;
   minutos: number;
+  porTipo: MinutesPerTipo;
 }
 
 export async function getMinutesByBlock(): Promise<BlockMinutes[]> {
@@ -134,16 +142,22 @@ export async function getMinutesByBlock(): Promise<BlockMinutes[]> {
     db.studySessions.toArray(),
   ]);
   const topicToBlock = new Map(topics.map((t) => [t.id, t.blockId]));
-  const minutesByBlock = new Map<string, number>();
+  const perBlock = new Map<string, MinutesPerTipo>();
   for (const session of sessions) {
     if (!session.topicId) continue;
     const blockId = topicToBlock.get(session.topicId);
     if (!blockId) continue;
-    minutesByBlock.set(blockId, (minutesByBlock.get(blockId) ?? 0) + session.duracionMin);
+    const acc = perBlock.get(blockId) ?? emptyPerTipo();
+    acc[session.tipo] += session.duracionMin;
+    perBlock.set(blockId, acc);
   }
   return [...blocks]
     .sort((a, b) => a.orden - b.orden)
-    .map((block) => ({ block, minutos: minutesByBlock.get(block.id) ?? 0 }));
+    .map((block) => {
+      const porTipo = perBlock.get(block.id) ?? emptyPerTipo();
+      const minutos = porTipo.lectura + porTipo.estudio + porTipo.test + porTipo.otros;
+      return { block, minutos, porTipo };
+    });
 }
 
 export interface MonthDayOverview {
@@ -199,15 +213,29 @@ export async function getMonthOverview(referenceDate: FechaISO): Promise<MonthDa
 export interface TopicMinutes {
   topic: Topic;
   minutos: number;
+  porTipo: MinutesPerTipo;
 }
 
+/** Basado en sesiones (no en `tiempoInvertidoMin`) para poder desglosar por
+ *  tipo de estudio con los mismos datos que el resto de gráficas. */
 export async function getMinutesByTopic(limit = 8): Promise<TopicMinutes[]> {
-  const topics = await db.topics.toArray();
+  const [topics, sessions] = await Promise.all([db.topics.toArray(), db.studySessions.toArray()]);
+  const perTopic = new Map<string, MinutesPerTipo>();
+  for (const session of sessions) {
+    if (!session.topicId) continue;
+    const acc = perTopic.get(session.topicId) ?? emptyPerTipo();
+    acc[session.tipo] += session.duracionMin;
+    perTopic.set(session.topicId, acc);
+  }
   return topics
-    .filter((t) => t.tiempoInvertidoMin > 0)
-    .sort((a, b) => b.tiempoInvertidoMin - a.tiempoInvertidoMin)
-    .slice(0, limit)
-    .map((topic) => ({ topic, minutos: topic.tiempoInvertidoMin }));
+    .map((topic) => {
+      const porTipo = perTopic.get(topic.id) ?? emptyPerTipo();
+      const minutos = porTipo.lectura + porTipo.estudio + porTipo.test + porTipo.otros;
+      return { topic, minutos, porTipo };
+    })
+    .filter((t) => t.minutos > 0)
+    .sort((a, b) => b.minutos - a.minutos)
+    .slice(0, limit);
 }
 
 export interface TypeMinutes {

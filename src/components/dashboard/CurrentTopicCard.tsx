@@ -2,14 +2,15 @@ import { BookOpen } from "lucide-react";
 import { SectionCard } from "@/components/shared/SectionCard";
 import { minutesToHoursLabel } from "@/lib/utils/date";
 import type { TypeMinutes } from "@/lib/services/stats.service";
-import type { Topic } from "@/types/topic";
+import type { Block, Topic } from "@/types/topic";
 
 interface CurrentTopicCardProps {
   topic: Topic | null;
+  block: Block | null;
   minutesByType: TypeMinutes[];
 }
 
-export function CurrentTopicCard({ topic, minutesByType }: CurrentTopicCardProps) {
+export function CurrentTopicCard({ topic, block, minutesByType }: CurrentTopicCardProps) {
   if (!topic) {
     return (
       <SectionCard title="Tema en curso">
@@ -27,6 +28,16 @@ export function CurrentTopicCard({ topic, minutesByType }: CurrentTopicCardProps
 
   return (
     <SectionCard title="Tema en curso">
+      {block && (
+        <p className="mb-1 flex items-center gap-1.5 text-xs text-muted-foreground">
+          <span
+            className="size-2 shrink-0 rounded-full"
+            style={{ backgroundColor: block.color }}
+            aria-hidden
+          />
+          {block.nombre}
+        </p>
+      )}
       <p className="text-sm font-medium text-foreground">{topic.nombre}</p>
       <p className="mt-1 text-sm text-muted-foreground">
         {minutesToHoursLabel(topic.tiempoInvertidoMin)} en total

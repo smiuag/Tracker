@@ -33,7 +33,7 @@ export function DayDetailSheet({ fecha, onClose }: DayDetailSheetProps) {
                 {detail ? minutesToHoursLabel(detail.totalMinutes) : "Cargando…"}
               </SheetDescription>
             </SheetHeader>
-            <div className="flex flex-col gap-4 overflow-y-auto px-4 pb-6">
+            <div className="flex flex-col gap-4 overflow-y-auto px-4 pb-16">
               {detail && detail.sessions.length > 0 ? (
                 <ul className="flex flex-col gap-2">
                   {detail.sessions.map((session) => (
@@ -43,7 +43,19 @@ export function DayDetailSheet({ fecha, onClose }: DayDetailSheetProps) {
                           <p className="truncate font-medium text-foreground">
                             {session.topicNombre ?? "Sin tema"}
                           </p>
-                          <p className="text-xs text-muted-foreground">{session.tipoLabel}</p>
+                          <p className="flex min-w-0 items-center gap-1.5 text-xs text-muted-foreground">
+                            {session.blockNombre && (
+                              <>
+                                <span
+                                  className="size-2 shrink-0 rounded-full"
+                                  style={{ backgroundColor: session.blockColor ?? undefined }}
+                                  aria-hidden
+                                />
+                                <span className="shrink-0">{session.blockNombre} ·</span>
+                              </>
+                            )}
+                            <span className="truncate">{session.tipoLabel}</span>
+                          </p>
                         </div>
                         <span className="shrink-0 text-xs text-muted-foreground">
                           {minutesToHoursLabel(session.duracionMin)}

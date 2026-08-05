@@ -4,22 +4,23 @@ import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
 import { SectionCard } from "@/components/shared/SectionCard";
 import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from "@/components/ui/chart";
 import { minutesToCompactTick, minutesToHoursLabel } from "@/lib/utils/date";
+import { STUDY_TYPES, STUDY_TYPE_COLORS, STUDY_TYPE_LABELS } from "@/lib/constants/studyTypes";
 import type { BlockMinutes } from "@/lib/services/stats.service";
 
 interface BlockTimeChartProps {
   data: BlockMinutes[];
 }
 
-const chartConfig = {
-  minutos: { label: "Tiempo invertido", color: "var(--primary)" },
-} satisfies ChartConfig;
+const chartConfig = Object.fromEntries(
+  STUDY_TYPES.map((tipo) => [tipo, { label: STUDY_TYPE_LABELS[tipo], color: STUDY_TYPE_COLORS[tipo] }])
+) satisfies ChartConfig;
 
 export function BlockTimeChart({ data }: BlockTimeChartProps) {
   const chartData = data.map((d) => ({
     bloque: d.block.nombre,
-    minutos: d.minutos,
+    ...d.porTipo,
   }));
-  const hasData = chartData.some((d) => d.minutos > 0);
+  const hasData = data.some((d) => d.minutos > 0);
 
   return (
     <SectionCard title="Tiempo por bloques">
@@ -45,11 +46,27 @@ export function BlockTimeChart({ data }: BlockTimeChartProps) {
             <ChartTooltip
               content={
                 <ChartTooltipContent
-                  formatter={(value) => minutesToHoursLabel(Number(value))}
+                  formatter={(value, name, item) =>
+                    Number(value) > 0 ? (
+                      <span className="flex w-full items-center justify-between gap-3">
+                        <span className="flex items-center gap-1.5 text-muted-foreground">
+                          <span
+                            className="size-2 rounded-full"
+                            style={{ backgroundColor: item?.color }}
+                            aria-hidden
+                          />
+                          {chartConfig[name as keyof typeof chartConfig]?.label ?? name}
+                        </span>
+                        <span className="text-foreground">{minutesToHoursLabel(Number(value))}</span>
+                      </span>
+                    ) : null
+                  }
                 />
               }
             />
-            <Bar dataKey="minutos" fill="var(--color-minutos)" radius={6} />
+            {STUDY_TYPES.map((tipo) => (
+              <Bar key={tipo} dataKey={tipo} stackId="tipo" fill={STUDY_TYPE_COLORS[tipo]} />
+            ))}
           </BarChart>
         </ChartContainer>
       ) : (

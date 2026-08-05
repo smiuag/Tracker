@@ -76,7 +76,13 @@ export function ProgresoView() {
         <StatTile icon={ListTodo} label="Temas restantes" value={String(data.topicsPending)} />
       </div>
 
-      <CurrentTopicCard topic={data.currentTopic} minutesByType={data.currentTopicMinutesByType} />
+      <CurrentTopicCard
+        topic={data.currentTopic}
+        block={
+          data.minutesByBlock.find((b) => b.block.id === data.currentTopic?.blockId)?.block ?? null
+        }
+        minutesByType={data.currentTopicMinutesByType}
+      />
 
       <MonthlyGoalsCard monthMinutes={data.monthMinutes} goalHours={data.monthlyGoalHours || null} />
 
