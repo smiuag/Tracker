@@ -167,9 +167,7 @@ export async function seedDatabaseIfEmpty(): Promise<void> {
   }
 
   const goalConfig: GoalConfig = {
-    weekdaysMode: "todos",
-    customWeekdays: [],
-    hoursPerDay: 3,
+    rules: [{ weekdays: [0, 1, 2, 3, 4, 5, 6], hours: 3 }],
     topicsPerWeek: null,
     fechaExamen: null,
   };

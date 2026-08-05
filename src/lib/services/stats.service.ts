@@ -1,6 +1,6 @@
 import { db } from "@/lib/db/db";
 import { addDays, isoWeekDates, startOfIsoWeek } from "@/lib/utils/date";
-import { applicableWeekdays, getGoalConfig, isApplicableDay } from "@/lib/services/settings.service";
+import { dailyGoalHoursFor, getGoalConfig, weeklyGoalHoursFor } from "@/lib/services/settings.service";
 import { STUDY_TYPE_LABELS } from "@/lib/constants/studyTypes";
 import type { Block, Topic } from "@/types/topic";
 import type { FechaISO, TipoEstudio } from "@/types/common";
@@ -51,7 +51,7 @@ export async function getStreakDetail(referenceDate: FechaISO): Promise<StreakDa
     const aggregate = await db.dailyAggregates.get(cursor);
     const minutos = aggregate?.minutosTotales ?? 0;
     if (minutos <= 0) break;
-    const goalHoras = config.hoursPerDay && isApplicableDay(config, cursor) ? config.hoursPerDay : 0;
+    const goalHoras = dailyGoalHoursFor(config, cursor);
     const goalMet = goalHoras > 0 && minutos >= goalHoras * 60;
     days.push({ fecha: cursor, minutos, goalMet });
     cursor = addDays(cursor, -1);
@@ -199,8 +199,7 @@ export async function getMonthOverview(referenceDate: FechaISO): Promise<MonthDa
   return Array.from({ length: daysInMonth }, (_, i) => {
     const fecha = `${monthPrefix}-${String(i + 1).padStart(2, "0")}`;
     const dayTopics = topicsByDate.get(fecha);
-    const goalMinutes =
-      config.hoursPerDay && isApplicableDay(config, fecha) ? config.hoursPerDay * 60 : 0;
+    const goalMinutes = dailyGoalHoursFor(config, fecha) * 60;
     return {
       fecha,
       minutos: minutesByDate.get(fecha) ?? 0,
@@ -337,8 +336,7 @@ export async function getWeeklyReport(weekStart: FechaISO): Promise<WeeklyReport
 /** % de semanas ya cerradas (anteriores a la actual) en las que se cumplió el objetivo semanal configurado. */
 export async function getGoalsCompliance(referenceDate: FechaISO): Promise<number> {
   const config = await getGoalConfig();
-  if (!config.hoursPerDay) return 0;
-  const weeklyTargetMinutes = config.hoursPerDay * applicableWeekdays(config).length * 60;
+  const weeklyTargetMinutes = weeklyGoalHoursFor(config) * 60;
   if (weeklyTargetMinutes <= 0) return 0;
 
   const totals = await getWeeklyTotals();

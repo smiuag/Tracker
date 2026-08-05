@@ -1,10 +1,22 @@
 import type { FechaISO } from "./common";
 
-export type WeekdaysMode = "todos" | "entre_semana" | "personalizado";
+/** Una franja del objetivo: los días seleccionados comparten horas diarias. */
+export interface GoalRule {
+  /** 0 = lunes … 6 = domingo */
+  weekdays: number[];
+  hours: number;
+}
 
 export interface GoalConfig {
-  weekdaysMode: WeekdaysMode;
-  /** Solo se usa cuando weekdaysMode es "personalizado". 0 = lunes … 6 = domingo. */
+  /** Franjas de estudio; un día de la semana pertenece como mucho a una. */
+  rules: GoalRule[];
+  topicsPerWeek: number | null;
+  fechaExamen: FechaISO | null;
+}
+
+/** Forma antigua (una sola franja implícita), aún presente en datos guardados. */
+export interface LegacyGoalConfig {
+  weekdaysMode: "todos" | "entre_semana" | "personalizado";
   customWeekdays: number[];
   hoursPerDay: number;
   topicsPerWeek: number | null;

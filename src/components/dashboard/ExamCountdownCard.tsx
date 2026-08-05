@@ -26,6 +26,7 @@ export function ExamCountdownCard({ fechaExamen }: ExamCountdownCardProps) {
 
   return (
     <div className="flex flex-col items-center gap-1.5 rounded-2xl bg-primary/30 px-4 py-5 text-center">
+      {daysLeft > 0 && <p className="text-sm font-medium text-foreground">Quedan</p>}
       <span className="mb-1 flex size-16 items-center justify-center rounded-full bg-card text-2xl font-semibold tabular-nums text-foreground shadow-sm">
         {daysLeft}
       </span>

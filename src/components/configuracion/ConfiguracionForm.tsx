@@ -2,17 +2,29 @@
 
 import { useState } from "react";
 import { toast } from "sonner";
+import { Plus, Trash2 } from "lucide-react";
 import { SectionCard } from "@/components/shared/SectionCard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { BackupSection } from "./BackupSection";
 import { SuggestionsSection } from "./SuggestionsSection";
 import { setBlockDurationMin, setGoalConfig, DEFAULT_BLOCK_DURATION_MIN } from "@/lib/services/settings.service";
-import type { GoalConfig, WeekdaysMode } from "@/types/settings";
+import { createId } from "@/lib/utils/id";
+import type { GoalConfig } from "@/types/settings";
 
 const WEEKDAY_LABELS = ["L", "M", "X", "J", "V", "S", "D"];
+
+/** Franja en edición: las horas se guardan como texto mientras se teclea. */
+interface RuleDraft {
+  key: string;
+  weekdays: number[];
+  hours: string;
+}
+
+function emptyRule(): RuleDraft {
+  return { key: createId(), weekdays: [], hours: "" };
+}
 
 interface ConfiguracionFormProps {
   goalConfig: GoalConfig;
@@ -20,27 +32,59 @@ interface ConfiguracionFormProps {
 }
 
 export function ConfiguracionForm({ goalConfig: initialGoalConfig, blockDurationMin }: ConfiguracionFormProps) {
-  const [goalConfig, setLocalGoalConfig] = useState<GoalConfig>(initialGoalConfig);
-  const [hoursPerDay, setHoursPerDay] = useState(String(initialGoalConfig.hoursPerDay));
+  const [rules, setRules] = useState<RuleDraft[]>(() =>
+    initialGoalConfig.rules.length > 0
+      ? initialGoalConfig.rules.map((r) => ({ key: createId(), weekdays: r.weekdays, hours: String(r.hours) }))
+      : [emptyRule()]
+  );
+  const [topicsPerWeek, setTopicsPerWeek] = useState(
+    initialGoalConfig.topicsPerWeek !== null ? String(initialGoalConfig.topicsPerWeek) : ""
+  );
+  const [fechaExamen, setFechaExamen] = useState(initialGoalConfig.fechaExamen ?? "");
   const [blockDuration, setLocalBlockDuration] = useState(String(blockDurationMin));
   const [saving, setSaving] = useState(false);
 
-  function toggleCustomDay(day: number) {
-    setLocalGoalConfig((prev) => {
-      const has = prev.customWeekdays.includes(day);
-      return {
-        ...prev,
-        customWeekdays: has
-          ? prev.customWeekdays.filter((d) => d !== day)
-          : [...prev.customWeekdays, day].sort((a, b) => a - b),
-      };
-    });
+  /** Un día pertenece como mucho a una franja: activarlo aquí lo quita de las demás. */
+  function toggleDay(ruleKey: string, day: number) {
+    setRules((prev) =>
+      prev.map((rule) => {
+        if (rule.key === ruleKey) {
+          const has = rule.weekdays.includes(day);
+          return {
+            ...rule,
+            weekdays: has
+              ? rule.weekdays.filter((d) => d !== day)
+              : [...rule.weekdays, day].sort((a, b) => a - b),
+          };
+        }
+        return { ...rule, weekdays: rule.weekdays.filter((d) => d !== day) };
+      })
+    );
+  }
+
+  function updateHours(ruleKey: string, hours: string) {
+    setRules((prev) => prev.map((r) => (r.key === ruleKey ? { ...r, hours } : r)));
+  }
+
+  function addRule() {
+    setRules((prev) => [...prev, emptyRule()]);
+  }
+
+  function removeRule(ruleKey: string) {
+    setRules((prev) => (prev.length > 1 ? prev.filter((r) => r.key !== ruleKey) : [emptyRule()]));
   }
 
   async function handleSave() {
     setSaving(true);
     try {
-      await setGoalConfig({ ...goalConfig, hoursPerDay: Math.max(0, Number(hoursPerDay) || 0) });
+      const config: GoalConfig = {
+        rules: rules
+          .map((r) => ({ weekdays: r.weekdays, hours: Math.max(0, Number(r.hours) || 0) }))
+          .filter((r) => r.weekdays.length > 0 && r.hours > 0),
+        topicsPerWeek: topicsPerWeek ? Number(topicsPerWeek) : null,
+        fechaExamen: fechaExamen || null,
+      };
+      await setGoalConfig(config);
       await setBlockDurationMin(Math.max(1, Number(blockDuration) || DEFAULT_BLOCK_DURATION_MIN));
       toast.success("Configuración guardada");
     } finally {
@@ -50,36 +94,31 @@ export function ConfiguracionForm({ goalConfig: initialGoalConfig, blockDuration
 
   return (
     <div className="flex flex-col gap-4">
-      <SectionCard title="Objetivo diario">
-        <div className="flex flex-col gap-4">
-          <div>
-            <Label className="mb-1.5 text-xs font-medium text-muted-foreground">¿Qué días?</Label>
-            <ToggleGroup
-              value={[goalConfig.weekdaysMode]}
-              onValueChange={(v) =>
-                v[0] &&
-                setLocalGoalConfig((prev) => ({ ...prev, weekdaysMode: v[0] as WeekdaysMode }))
-              }
-            >
-              <ToggleGroupItem value="todos" className="px-3">
-                Toda la semana
-              </ToggleGroupItem>
-              <ToggleGroupItem value="entre_semana" className="px-3">
-                Entre semana
-              </ToggleGroupItem>
-              <ToggleGroupItem value="personalizado" className="px-3">
-                Días específicos
-              </ToggleGroupItem>
-            </ToggleGroup>
-            {goalConfig.weekdaysMode === "personalizado" && (
-              <div className="mt-2 flex gap-1.5">
+      <SectionCard title="Objetivo de estudio">
+        <div className="flex flex-col gap-3">
+          {rules.map((rule, index) => (
+            <div key={rule.key} className="flex flex-col gap-2.5 rounded-lg border border-border p-3">
+              <div className="flex items-center justify-between gap-2">
+                <p className="text-xs font-medium text-muted-foreground">Franja {index + 1}</p>
+                {rules.length > 1 && (
+                  <Button
+                    size="icon-xs"
+                    variant="ghost"
+                    onClick={() => removeRule(rule.key)}
+                    aria-label="Quitar franja"
+                  >
+                    <Trash2 className="size-3.5 text-destructive" />
+                  </Button>
+                )}
+              </div>
+              <div className="flex gap-1.5">
                 {WEEKDAY_LABELS.map((label, day) => {
-                  const active = goalConfig.customWeekdays.includes(day);
+                  const active = rule.weekdays.includes(day);
                   return (
                     <button
                       key={day}
                       type="button"
-                      onClick={() => toggleCustomDay(day)}
+                      onClick={() => toggleDay(rule.key, day)}
                       className={
                         active
                           ? "flex size-8 items-center justify-center rounded-full bg-primary text-sm font-medium text-primary-foreground"
@@ -91,44 +130,41 @@ export function ConfiguracionForm({ goalConfig: initialGoalConfig, blockDuration
                   );
                 })}
               </div>
-            )}
-          </div>
+              <div className="flex items-center gap-2">
+                <Input
+                  type="number"
+                  min={0}
+                  step={0.5}
+                  value={rule.hours}
+                  onChange={(e) => updateHours(rule.key, e.target.value)}
+                  className="w-24"
+                  aria-label={`Horas al día de la franja ${index + 1}`}
+                />
+                <span className="text-xs text-muted-foreground">horas cada uno de esos días</span>
+              </div>
+            </div>
+          ))}
 
-          <div className="grid gap-3 sm:grid-cols-2">
-            <div>
-              <Label htmlFor="hours-per-day" className="mb-1.5 text-xs font-medium text-muted-foreground">
-                Horas al día
-              </Label>
-              <Input
-                id="hours-per-day"
-                type="number"
-                min={0}
-                step={0.5}
-                value={hoursPerDay}
-                onChange={(e) => setHoursPerDay(e.target.value)}
-              />
-            </div>
-            <div>
-              <Label htmlFor="topics-per-week" className="mb-1.5 text-xs font-medium text-muted-foreground">
-                Temas por semana (opcional)
-              </Label>
-              <Input
-                id="topics-per-week"
-                type="number"
-                min={0}
-                value={goalConfig.topicsPerWeek ?? ""}
-                onChange={(e) =>
-                  setLocalGoalConfig((prev) => ({
-                    ...prev,
-                    topicsPerWeek: e.target.value ? Number(e.target.value) : null,
-                  }))
-                }
-              />
-            </div>
+          <Button variant="outline" onClick={addRule} className="w-fit gap-1.5">
+            <Plus className="size-4" />
+            Añadir franja
+          </Button>
+
+          <div>
+            <Label htmlFor="topics-per-week" className="mb-1.5 text-xs font-medium text-muted-foreground">
+              Temas por semana (opcional)
+            </Label>
+            <Input
+              id="topics-per-week"
+              type="number"
+              min={0}
+              value={topicsPerWeek}
+              onChange={(e) => setTopicsPerWeek(e.target.value)}
+            />
           </div>
 
           <p className="text-xs text-muted-foreground">
-            El objetivo semanal y mensual se calculan solos a partir de esto.
+            El objetivo semanal y mensual se calculan solos a partir de las franjas.
           </p>
         </div>
       </SectionCard>
@@ -141,10 +177,8 @@ export function ConfiguracionForm({ goalConfig: initialGoalConfig, blockDuration
           <Input
             id="fecha-examen"
             type="date"
-            value={goalConfig.fechaExamen ?? ""}
-            onChange={(e) =>
-              setLocalGoalConfig((prev) => ({ ...prev, fechaExamen: e.target.value || null }))
-            }
+            value={fechaExamen}
+            onChange={(e) => setFechaExamen(e.target.value)}
             className="w-48"
           />
         </div>
