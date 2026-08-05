@@ -1,4 +1,3 @@
-import { Hourglass } from "lucide-react";
 import { daysBetween, fromFechaISO, toFechaISO } from "@/lib/utils/date";
 import type { FechaISO } from "@/types/common";
 
@@ -26,23 +25,14 @@ export function ExamCountdownCard({ fechaExamen }: ExamCountdownCardProps) {
   const phrase = MOTIVATIONAL_PHRASES[seed % MOTIVATIONAL_PHRASES.length];
 
   return (
-    <div className="flex items-center gap-3 rounded-2xl bg-primary/30 px-4 py-3">
-      <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-card/70">
-        <Hourglass className="size-5 text-foreground" />
+    <div className="flex flex-col items-center gap-1.5 rounded-2xl bg-primary/30 px-4 py-5 text-center">
+      <span className="mb-1 flex size-16 items-center justify-center rounded-full bg-card text-2xl font-semibold tabular-nums text-foreground shadow-sm">
+        {daysLeft}
       </span>
-      <div className="min-w-0">
-        {daysLeft === 0 ? (
-          <p className="text-xl font-semibold text-foreground">¡Es hoy!</p>
-        ) : (
-          <p className="flex items-baseline gap-1.5 text-foreground">
-            <span className="text-2xl font-semibold leading-none tabular-nums">{daysLeft}</span>
-            <span className="text-sm font-medium">
-              día{daysLeft === 1 ? "" : "s"} para el examen
-            </span>
-          </p>
-        )}
-        <p className="mt-0.5 text-xs text-muted-foreground">{phrase}</p>
-      </div>
+      <p className="text-sm font-medium text-foreground">
+        {daysLeft === 0 ? "¡El examen es hoy!" : `día${daysLeft === 1 ? "" : "s"} para el examen`}
+      </p>
+      <p className="text-xs italic text-muted-foreground">{phrase}</p>
     </div>
   );
 }

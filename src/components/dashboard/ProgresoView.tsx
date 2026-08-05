@@ -9,7 +9,6 @@ import { WeeklyHoursCard } from "./WeeklyHoursCard";
 import { StreakBadge } from "./StreakBadge";
 import { TopicProgressBar } from "./TopicProgressBar";
 import { CurrentTopicCard } from "./CurrentTopicCard";
-import { BlockTimeChart } from "./BlockTimeChart";
 import { MonthCalendar } from "./MonthCalendar";
 import { MonthlyGoalsCard } from "./MonthlyGoalsCard";
 
@@ -86,7 +85,6 @@ export function ProgresoView() {
 
       <MonthlyGoalsCard monthMinutes={data.monthMinutes} goalHours={data.monthlyGoalHours || null} />
 
-      <BlockTimeChart data={data.minutesByBlock} />
       <MonthCalendar />
     </div>
   );
