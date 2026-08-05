@@ -4,7 +4,7 @@ import { ConfiguracionView } from "@/components/configuracion/ConfiguracionView"
 export default function ConfiguracionPage() {
   return (
     <>
-      <PageHeader title="Configuración" />
+      <PageHeader title="Configuración" subtitle="Personaliza tu estudio" />
       <ConfiguracionView />
     </>
   );
