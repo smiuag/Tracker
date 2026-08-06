@@ -21,6 +21,7 @@ export function SuggestionsSection() {
     if (!body) return;
     const subject = encodeURIComponent("Sugerencia para Opobook");
     window.location.href = `mailto:${FEEDBACK_EMAIL}?subject=${subject}&body=${encodeURIComponent(body)}`;
+    setText("");
   }
 
   return (

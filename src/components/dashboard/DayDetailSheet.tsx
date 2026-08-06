@@ -33,7 +33,9 @@ export function DayDetailSheet({ fecha, onClose }: DayDetailSheetProps) {
                 {detail ? minutesToHoursLabel(detail.totalMinutes) : "Cargando…"}
               </SheetDescription>
             </SheetHeader>
-            <div className="flex flex-col gap-4 overflow-y-auto px-4 pb-16">
+            <div className="flex flex-col gap-4 overflow-y-auto px-4 pb-[calc(4rem+env(safe-area-inset-bottom))]">
+              <DailyTaskChecklist fecha={fecha} />
+
               {detail && detail.sessions.length > 0 ? (
                 <ul className="flex flex-col gap-2">
                   {detail.sessions.map((session) => (
@@ -99,8 +101,6 @@ export function DayDetailSheet({ fecha, onClose }: DayDetailSheetProps) {
               )}
 
               {isPastDay && <AddPastSessionForm fecha={fecha} />}
-
-              <DailyTaskChecklist fecha={fecha} />
             </div>
           </>
         )}
