@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { BackupSection } from "./BackupSection";
+import { DonationsSection } from "./DonationsSection";
 import { SuggestionsSection } from "./SuggestionsSection";
 import { setBlockDurationMin, setGoalConfig, DEFAULT_BLOCK_DURATION_MIN } from "@/lib/services/settings.service";
 import { createId } from "@/lib/utils/id";
@@ -114,6 +115,8 @@ export function ConfiguracionForm({ goalConfig: initialGoalConfig, blockDuration
               <div className="flex gap-1.5">
                 {WEEKDAY_LABELS.map((label, day) => {
                   const active = rule.weekdays.includes(day);
+                  // Fin de semana en rosa (bg-accent), el mismo tono que usa la racha.
+                  const activeColor = day >= 5 ? "bg-accent text-accent-foreground" : "bg-primary text-primary-foreground";
                   return (
                     <button
                       key={day}
@@ -121,7 +124,7 @@ export function ConfiguracionForm({ goalConfig: initialGoalConfig, blockDuration
                       onClick={() => toggleDay(rule.key, day)}
                       className={
                         active
-                          ? "flex size-8 items-center justify-center rounded-full bg-primary text-sm font-medium text-primary-foreground"
+                          ? `flex size-8 items-center justify-center rounded-full text-sm font-medium ${activeColor}`
                           : "flex size-8 items-center justify-center rounded-full border border-border text-sm text-muted-foreground"
                       }
                     >
@@ -208,6 +211,8 @@ export function ConfiguracionForm({ goalConfig: initialGoalConfig, blockDuration
       <BackupSection />
 
       <SuggestionsSection />
+
+      <DonationsSection />
     </div>
   );
 }

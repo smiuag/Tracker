@@ -6,7 +6,7 @@ import { SectionCard } from "@/components/shared/SectionCard";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 
-const FEEDBACK_EMAIL = "Teamopoflow@gmail.com";
+const FEEDBACK_EMAIL = "opobook@protonmail.com";
 
 /**
  * Buzón de sugerencias sin backend: compone un mailto: y abre la app de
