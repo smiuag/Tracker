@@ -13,7 +13,7 @@ export function SideNav() {
     <aside className="hidden w-60 shrink-0 border-r border-border bg-sidebar px-3 py-6 md:flex md:flex-col">
       <div className="mb-8 px-3">
         <span className="text-lg font-semibold tracking-tight text-foreground">
-          OpoFlow
+          Opobook
         </span>
       </div>
       <nav className="flex flex-col gap-1" aria-label="Navegación principal">

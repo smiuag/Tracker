@@ -16,7 +16,7 @@ export function UpdateAvailableToast() {
 
     function handleControllerChange() {
       if (!hadControllerOnMount) return;
-      toast("Hay una versión nueva de OpoFlow", {
+      toast("Hay una versión nueva de Opobook", {
         description: "Actualiza para ver los últimos cambios.",
         duration: Infinity,
         action: {

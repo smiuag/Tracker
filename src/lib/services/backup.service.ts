@@ -27,7 +27,7 @@ export function downloadBackup(payload: BackupPayload): void {
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = `opoflow-backup-${payload.exportedAt.slice(0, 10)}.json`;
+  a.download = `opobook-backup-${payload.exportedAt.slice(0, 10)}.json`;
   a.click();
   URL.revokeObjectURL(url);
 }
@@ -39,7 +39,7 @@ export function parseBackupFile(file: File): Promise<BackupPayload> {
       try {
         const parsed = JSON.parse(String(reader.result));
         if (!parsed || typeof parsed !== "object" || !parsed.tables) {
-          reject(new Error("El archivo no tiene el formato de un backup de OpoFlow"));
+          reject(new Error("El archivo no tiene el formato de un backup de Opobook"));
           return;
         }
         resolve(parsed as BackupPayload);

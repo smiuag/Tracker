@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "OpoFlow",
+  title: "Opobook",
   description: "Planifica, sigue y analiza tu preparación de oposición.",
   manifest: "/manifest.webmanifest",
   icons: {
@@ -27,7 +27,7 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "OpoFlow",
+    title: "Opobook",
   },
 };
 

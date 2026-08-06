@@ -19,7 +19,7 @@ export function SuggestionsSection() {
   function handleSend() {
     const body = text.trim();
     if (!body) return;
-    const subject = encodeURIComponent("Sugerencia para OpoFlow");
+    const subject = encodeURIComponent("Sugerencia para Opobook");
     window.location.href = `mailto:${FEEDBACK_EMAIL}?subject=${subject}&body=${encodeURIComponent(body)}`;
   }
 
@@ -27,7 +27,7 @@ export function SuggestionsSection() {
     <SectionCard title="Sugerencias">
       <div className="flex flex-col gap-3">
         <p className="text-sm text-muted-foreground">
-          ¿Se te ocurre cómo mejorar OpoFlow? Cuéntanoslo — al enviar se abrirá
+          ¿Se te ocurre cómo mejorar Opobook? Cuéntanoslo — al enviar se abrirá
           tu app de correo con el mensaje preparado.
         </p>
         <Textarea

@@ -4,8 +4,8 @@ export const dynamic = "force-static";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "OpoFlow",
-    short_name: "OpoFlow",
+    name: "Opobook",
+    short_name: "Opobook",
     description: "Planifica, sigue y analiza tu preparación de oposición.",
     start_url: "/",
     display: "standalone",
