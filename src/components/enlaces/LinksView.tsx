@@ -15,7 +15,7 @@ const LINKS: {
     href: "/instalar",
     icon: Download,
     label: "Descargar la app",
-    sub: "Cómo instalarla en tu móvil u ordenador",
+    sub: "Cómo instalarla en tu móvil",
     external: false,
   },
   {
@@ -40,7 +40,7 @@ const LINKS: {
     external: true,
   },
   {
-    href: "mailto:opobook@protonmail.com",
+    href: "mailto:opobook@protonmail.com?subject=Sugerencia%20Opobook",
     icon: Send,
     label: "Sugerencias",
     sub: "Cuéntanos cómo mejorar la app",

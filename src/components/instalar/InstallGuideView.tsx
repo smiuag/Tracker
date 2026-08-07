@@ -9,7 +9,6 @@ import {
   Compass,
   EllipsisVertical,
   Globe,
-  MonitorDown,
   Share,
   SquarePlus,
   TriangleAlert,
@@ -17,7 +16,7 @@ import {
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { ComponentType } from "react";
 
-type Device = "ios" | "android" | "desktop";
+type Device = "ios" | "android";
 
 interface Step {
   icon: ComponentType<{ className?: string }>;
@@ -76,37 +75,15 @@ const STEPS: Record<Device, Step[]> = {
       sub: "Tendrás Opobook en la pantalla de inicio y en tu cajón de aplicaciones.",
     },
   ],
-  desktop: [
-    {
-      icon: Globe,
-      title: "Abre Opobook en Chrome o Edge",
-      sub: "Desde tu ordenador, con Chrome o Microsoft Edge.",
-    },
-    {
-      icon: MonitorDown,
-      title: "Pulsa el icono de instalar",
-      sub: "Está a la derecha de la barra de direcciones; también en menú ⋮ → «Instalar Opobook».",
-      mock: { icon: MonitorDown, label: "Instalar Opobook" },
-    },
-    {
-      icon: Check,
-      title: "Confirma «Instalar»",
-      sub: "Se abrirá en su propia ventana, como un programa más de tu ordenador.",
-    },
-  ],
 };
 
 const DEVICE_LABELS: { value: Device; label: string }[] = [
   { value: "ios", label: "iPhone / iPad" },
   { value: "android", label: "Android" },
-  { value: "desktop", label: "Ordenador" },
 ];
 
 function detectDevice(): Device {
-  const ua = navigator.userAgent;
-  if (/android/i.test(ua)) return "android";
-  if (/iphone|ipad|ipod/i.test(ua)) return "ios";
-  return "desktop";
+  return /android/i.test(navigator.userAgent) ? "android" : "ios";
 }
 
 const noopSubscribe = () => () => {};
@@ -156,16 +133,14 @@ export function InstallGuideView() {
         </Tabs>
       </div>
 
-      {device !== "desktop" && (
-        <div className="mt-4 flex items-start gap-2.5 rounded-xl bg-accent/50 p-3.5 text-sm text-foreground">
-          <TriangleAlert className="mt-0.5 size-4 shrink-0" />
-          <p>
-            ¿Vienes desde Instagram o TikTok? Su navegador interno no permite
-            instalar: toca <strong>⋯</strong> y elige{" "}
-            <strong>«Abrir en el navegador»</strong> primero.
-          </p>
-        </div>
-      )}
+      <div className="mt-4 flex items-start gap-2.5 rounded-xl bg-accent/50 p-3.5 text-sm text-foreground">
+        <TriangleAlert className="mt-0.5 size-4 shrink-0" />
+        <p>
+          ¿Vienes desde Instagram o TikTok? Su navegador interno no permite
+          instalar: toca <strong>⋯</strong> y elige{" "}
+          <strong>«Abrir en el navegador»</strong> primero.
+        </p>
+      </div>
 
       <ol className="mt-5 flex flex-col gap-3">
         {STEPS[device].map((step, i) => (
@@ -196,11 +171,8 @@ export function InstallGuideView() {
         href="/"
         className="mt-8 flex items-center justify-center gap-2 rounded-2xl bg-primary p-4 font-medium text-primary-foreground transition-transform hover:scale-[1.01]"
       >
-        Abrir Opobook
+        {device === "ios" ? "Abrir Opobook en Safari" : "Abrir Opobook en Chrome"}
       </Link>
-      <p className="mt-3 text-center text-xs text-muted-foreground">
-        También puedes usarla directamente en el navegador, sin instalar nada.
-      </p>
     </div>
   );
 }

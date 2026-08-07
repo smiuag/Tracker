@@ -1,4 +1,4 @@
-# OpoFlow
+# Opobook
 
 Sistema de planificación, seguimiento y análisis para la preparación de una oposición. No es una app de tareas ni un Pomodoro: es un dashboard con datos reales de tu progreso — cuántas horas llevas, qué te toca hoy, qué porcentaje del temario dominas, qué repasos tienes pendientes.
 

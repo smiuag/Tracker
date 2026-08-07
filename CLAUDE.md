@@ -1,8 +1,8 @@
 @AGENTS.md
 
-# OpoFlow
+# Opobook
 
-OpoFlow es una aplicación diseñada específicamente para opositores.
+Opobook es una aplicación diseñada específicamente para opositores.
 
 No es una app de tareas.
 No es un calendario.
@@ -516,7 +516,7 @@ Recomendaciones automáticas.
 
 # Objetivo final
 
-Cuando un opositor abra OpoFlow debe sentir calma.
+Cuando un opositor abra Opobook debe sentir calma.
 
 Nunca debe sentirse perdido.
 

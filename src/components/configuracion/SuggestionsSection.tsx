@@ -19,7 +19,7 @@ export function SuggestionsSection() {
   function handleSend() {
     const body = text.trim();
     if (!body) return;
-    const subject = encodeURIComponent("Sugerencia para Opobook");
+    const subject = encodeURIComponent("Sugerencia Opobook");
     window.location.href = `mailto:${FEEDBACK_EMAIL}?subject=${subject}&body=${encodeURIComponent(body)}`;
     setText("");
   }
