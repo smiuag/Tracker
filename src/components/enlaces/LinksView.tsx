@@ -12,17 +12,17 @@ const LINKS: {
   external: boolean;
 }[] = [
   {
-    href: "/instalar",
-    icon: Download,
-    label: "Descargar la app",
-    sub: "Cómo instalarla en tu móvil",
-    external: false,
-  },
-  {
     href: "/ayuda",
     icon: CircleHelp,
     label: "¿Qué es Opobook?",
     sub: "Qué hace y cómo funciona",
+    external: false,
+  },
+  {
+    href: "/instalar",
+    icon: Download,
+    label: "Descargar la app",
+    sub: "Cómo instalarla en tu móvil",
     external: false,
   },
   {
@@ -40,17 +40,17 @@ const LINKS: {
     external: true,
   },
   {
-    href: "https://revolut.me/opobook",
-    icon: Heart,
-    label: "Apoya el proyecto",
-    sub: "Donación voluntaria por Revolut",
-    external: true,
-  },
-  {
     href: "mailto:opobook@protonmail.com?subject=Sugerencia%20Opobook",
     icon: Send,
     label: "Sugerencias",
     sub: "Cuéntanos cómo mejorar la app",
+    external: true,
+  },
+  {
+    href: "https://revolut.me/opobook",
+    icon: Heart,
+    label: "Apoya el proyecto",
+    sub: "Donación voluntaria por Revolut",
     external: true,
   },
 ];
