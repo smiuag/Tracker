@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { BackupSection } from "./BackupSection";
 import { DonationsSection } from "./DonationsSection";
 import { SuggestionsSection } from "./SuggestionsSection";
+import { TopicsPaceHint } from "./TopicsPaceHint";
 import { setBlockDurationMin, setGoalConfig, DEFAULT_BLOCK_DURATION_MIN } from "@/lib/services/settings.service";
 import { createId } from "@/lib/utils/id";
 import type { GoalConfig } from "@/types/settings";
@@ -164,6 +165,7 @@ export function ConfiguracionForm({ goalConfig: initialGoalConfig, blockDuration
               value={topicsPerWeek}
               onChange={(e) => setTopicsPerWeek(e.target.value)}
             />
+            <TopicsPaceHint topicsPerWeek={topicsPerWeek} />
           </div>
 
           <p className="text-xs text-muted-foreground">

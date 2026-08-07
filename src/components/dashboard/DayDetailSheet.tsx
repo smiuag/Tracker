@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { Trash2 } from "lucide-react";
 import {
   Sheet,
@@ -23,6 +24,20 @@ interface DayDetailSheetProps {
 export function DayDetailSheet({ fecha, onClose }: DayDetailSheetProps) {
   const detail = useDayDetail(fecha);
   const isPastDay = !!fecha && fecha < toFechaISO(new Date());
+
+  // Borrado en dos toques: el primero pide confirmación en línea y, si no se
+  // confirma en unos segundos (o se cambia de día), vuelve a la papelera.
+  const [confirmingId, setConfirmingId] = useState<string | null>(null);
+  const [lastFecha, setLastFecha] = useState(fecha);
+  if (fecha !== lastFecha) {
+    setLastFecha(fecha);
+    setConfirmingId(null);
+  }
+  useEffect(() => {
+    if (!confirmingId) return;
+    const timer = setTimeout(() => setConfirmingId(null), 4000);
+    return () => clearTimeout(timer);
+  }, [confirmingId]);
 
   return (
     <Sheet open={!!fecha} onOpenChange={(open) => !open && onClose()}>
@@ -65,14 +80,27 @@ export function DayDetailSheet({ fecha, onClose }: DayDetailSheetProps) {
                         </div>
                         <span className="flex shrink-0 items-center gap-2 text-xs text-muted-foreground">
                           {minutesToHoursLabel(session.duracionMin)}
-                          <button
-                            type="button"
-                            onClick={() => deleteSession(session.id)}
-                            className="text-muted-foreground hover:text-foreground"
-                            aria-label="Eliminar sesión"
-                          >
-                            <Trash2 className="size-3.5" />
-                          </button>
+                          {confirmingId === session.id ? (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                deleteSession(session.id);
+                                setConfirmingId(null);
+                              }}
+                              className="rounded-md bg-destructive/10 px-2 py-0.5 font-medium text-destructive"
+                            >
+                              ¿Eliminar?
+                            </button>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={() => setConfirmingId(session.id)}
+                              className="text-muted-foreground hover:text-foreground"
+                              aria-label="Eliminar sesión"
+                            >
+                              <Trash2 className="size-3.5" />
+                            </button>
+                          )}
                         </span>
                       </div>
                       {session.observaciones && (

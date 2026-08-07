@@ -25,36 +25,45 @@ export async function getMonthMinutes(referenceDate: FechaISO): Promise<number> 
 }
 
 export async function getStreak(referenceDate: FechaISO): Promise<number> {
-  let streak = 0;
-  let cursor = referenceDate;
-  // Acotado a la racha activa: se detiene en el primer día sin minutos.
-  while (true) {
-    const aggregate = await db.dailyAggregates.get(cursor);
-    if (!aggregate || aggregate.minutosTotales <= 0) break;
-    streak += 1;
-    cursor = addDays(cursor, -1);
-  }
-  return streak;
+  return (await getStreakDetail(referenceDate)).length;
 }
 
 export interface StreakDay {
   fecha: FechaISO;
   minutos: number;
-  /** Minutos objetivo ese día (0 si el día no estaba previsto para estudiar). */
+  /** Minutos objetivo ese día (0 solo cuando no hay ninguna franja configurada). */
   goalMinutes: number;
 }
 
-/** Días de la racha activa (orden cronológico), con el objetivo de cada día
- *  para poder colorearlos con la misma escala que el calendario. */
+/**
+ * Días de la racha activa (orden cronológico). Reglas:
+ * - Solo cuentan los días con objetivo de estudio configurado; los días de
+ *   descanso se saltan sin romper la racha.
+ * - Sin ninguna franja configurada, cuenta cualquier día con estudio.
+ * - El día en curso solo suma, nunca resta: con hoy aún a cero la racha sigue
+ *   viva, y solo muere cuando un día evaluable ya cerrado quedó sin estudiar.
+ */
 export async function getStreakDetail(referenceDate: FechaISO): Promise<StreakDay[]> {
   const config = await getGoalConfig();
+  const hasRules = config.rules.length > 0;
+  const aggregates = await db.dailyAggregates.toArray();
+  const minutesByDate = new Map(aggregates.map((a) => [a.fecha, a.minutosTotales]));
+  const activeDates = aggregates.filter((a) => a.minutosTotales > 0).map((a) => a.fecha);
+  if (activeDates.length === 0) return [];
+  // Cota inferior del recorrido: sin ella, un calendario sin objetivos (todo
+  // descanso) haría retroceder el cursor indefinidamente.
+  const firstDate = activeDates.reduce((min, fecha) => (fecha < min ? fecha : min));
+
   const days: StreakDay[] = [];
   let cursor = referenceDate;
-  while (true) {
-    const aggregate = await db.dailyAggregates.get(cursor);
-    const minutos = aggregate?.minutosTotales ?? 0;
-    if (minutos <= 0) break;
-    days.push({ fecha: cursor, minutos, goalMinutes: dailyGoalHoursFor(config, cursor) * 60 });
+  while (cursor >= firstDate) {
+    const goalMinutes = dailyGoalHoursFor(config, cursor) * 60;
+    const minutos = minutesByDate.get(cursor) ?? 0;
+    const evaluable = hasRules ? goalMinutes > 0 : true;
+    if (evaluable) {
+      if (minutos > 0) days.push({ fecha: cursor, minutos, goalMinutes });
+      else if (cursor !== referenceDate) break;
+    }
     cursor = addDays(cursor, -1);
   }
   return days.reverse();
@@ -65,6 +74,9 @@ export async function getConsecutiveActiveWeeks(referenceDate: FechaISO): Promis
   const totals = await getWeeklyTotals();
   let weeks = 0;
   let cursor = startOfIsoWeek(referenceDate);
+  // Mismo criterio que la racha diaria: la semana en curso solo suma, nunca
+  // resta — si aún está a cero, se cuenta desde la semana pasada.
+  if ((totals.get(cursor) ?? 0) <= 0) cursor = addDays(cursor, -7);
   while ((totals.get(cursor) ?? 0) > 0) {
     weeks += 1;
     cursor = addDays(cursor, -7);
