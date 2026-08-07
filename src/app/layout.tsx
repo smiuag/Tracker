@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
 import { AppShell } from "@/components/layout/AppShell";
 import "./globals.css";
 
@@ -52,6 +53,9 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col overflow-x-hidden bg-background text-foreground">
         <AppShell>{children}</AppShell>
+        {/* Vercel Web Analytics: páginas vistas y visitantes, sin cookies.
+            Solo emite datos en producción (dominio de Vercel). */}
+        <Analytics />
       </body>
     </html>
   );
