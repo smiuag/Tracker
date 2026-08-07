@@ -217,6 +217,10 @@ export function ConfiguracionForm({ goalConfig: initialGoalConfig, blockDuration
       <SuggestionsSection />
 
       <DonationsSection />
+
+      <p className="pb-2 text-center text-xs text-muted-foreground">
+        Hecho con calma para opositores · Opobook
+      </p>
     </div>
   );
 }

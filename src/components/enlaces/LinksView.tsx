@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { Download, Heart, Music2, Send } from "lucide-react";
+import { CircleHelp, Download, Heart, Music2, Send } from "lucide-react";
 import type { ComponentType } from "react";
 import { InstagramIcon } from "./InstagramIcon";
 
@@ -16,6 +16,13 @@ const LINKS: {
     icon: Download,
     label: "Descargar la app",
     sub: "Cómo instalarla en tu móvil",
+    external: false,
+  },
+  {
+    href: "/ayuda",
+    icon: CircleHelp,
+    label: "¿Qué es Opobook?",
+    sub: "Qué hace y cómo funciona",
     external: false,
   },
   {

@@ -23,7 +23,11 @@ export function WeeklyHoursCard({ goalHours }: WeeklyHoursCardProps) {
   const [weekOffset, setWeekOffset] = useState(0);
   const today = toFechaISO(new Date());
   const referenceDate = addDays(today, weekOffset * 7);
-  const weeklyMinutes = useWeekMinutes(referenceDate) ?? 0;
+  const liveMinutes = useWeekMinutes(referenceDate);
+  // Evita el parpadeo a 0 mientras carga la semana recién seleccionada.
+  const [cachedMinutes, setCachedMinutes] = useState(liveMinutes);
+  if (liveMinutes !== undefined && liveMinutes !== cachedMinutes) setCachedMinutes(liveMinutes);
+  const weeklyMinutes = liveMinutes ?? cachedMinutes ?? 0;
   const dates = isoWeekDates(referenceDate);
 
   const goalMinutes = goalHours ? goalHours * 60 : null;

@@ -17,7 +17,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   // Páginas públicas (link-in-bio y guía de instalación): sin navegación ni
   // mobiliario de la app — las ven visitantes de Instagram, no usuarios.
-  if (pathname === "/enlaces" || pathname === "/instalar") {
+  if (pathname === "/enlaces" || pathname === "/instalar" || pathname === "/ayuda") {
     return <>{children}</>;
   }
 

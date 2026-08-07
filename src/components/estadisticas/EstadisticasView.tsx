@@ -14,8 +14,14 @@ import { WeeklyEvolutionChart } from "./WeeklyEvolutionChart";
 
 export function EstadisticasView() {
   const [period, setPeriod] = useState<StatsPeriod>("todo");
-  const data = useEstadisticasData(period);
+  const live = useEstadisticasData(period);
   const blocks = useBlocks();
+
+  // Al cambiar de periodo, la consulta tarda un instante: se mantienen los
+  // datos anteriores en pantalla para que las pestañas respondan al momento.
+  const [cached, setCached] = useState(live);
+  if (live && live !== cached) setCached(live);
+  const data = live ?? cached;
 
   if (!data) {
     return (
