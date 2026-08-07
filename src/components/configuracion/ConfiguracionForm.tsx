@@ -170,6 +170,8 @@ export function ConfiguracionForm({ goalConfig: initialGoalConfig, blockDuration
 
           <p className="text-xs text-muted-foreground">
             El objetivo semanal y mensual se calculan solos a partir de las franjas.
+            Los cambios se aplican desde hoy: los días anteriores conservan el
+            objetivo que tenían entonces.
           </p>
         </div>
       </SectionCard>

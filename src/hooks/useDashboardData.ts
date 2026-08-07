@@ -56,7 +56,7 @@ export function useDashboardData() {
       getTopicProgressBreakdown(),
       getCurrentTopic(),
       getMinutesByBlock(),
-      getWeeklyGoalHours(),
+      getWeeklyGoalHours(today),
       getMonthlyGoalHours(today),
       getGoalConfig(),
     ]);

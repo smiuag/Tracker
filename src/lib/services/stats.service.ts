@@ -1,6 +1,6 @@
 import { db } from "@/lib/db/db";
 import { addDays, isoWeekDates, startOfIsoWeek } from "@/lib/utils/date";
-import { dailyGoalHoursFor, getGoalConfig } from "@/lib/services/settings.service";
+import { dailyGoalHoursAt, getGoalRulesHistory, rulesAt } from "@/lib/services/settings.service";
 import type { Topic } from "@/types/topic";
 import type { FechaISO } from "@/types/common";
 
@@ -44,8 +44,7 @@ export interface StreakDay {
  *   viva, y solo muere cuando un día evaluable ya cerrado quedó sin estudiar.
  */
 export async function getStreakDetail(referenceDate: FechaISO): Promise<StreakDay[]> {
-  const config = await getGoalConfig();
-  const hasRules = config.rules.length > 0;
+  const history = await getGoalRulesHistory();
   const aggregates = await db.dailyAggregates.toArray();
   const minutesByDate = new Map(aggregates.map((a) => [a.fecha, a.minutosTotales]));
   const activeDates = aggregates.filter((a) => a.minutosTotales > 0).map((a) => a.fecha);
@@ -57,9 +56,11 @@ export async function getStreakDetail(referenceDate: FechaISO): Promise<StreakDa
   const days: StreakDay[] = [];
   let cursor = referenceDate;
   while (cursor >= firstDate) {
-    const goalMinutes = dailyGoalHoursFor(config, cursor) * 60;
+    const goalMinutes = dailyGoalHoursAt(history, cursor) * 60;
     const minutos = minutesByDate.get(cursor) ?? 0;
-    const evaluable = hasRules ? goalMinutes > 0 : true;
+    // Cada día se evalúa con las franjas vigentes entonces; si ese día no
+    // había ninguna configurada, cuenta cualquier estudio.
+    const evaluable = rulesAt(history, cursor).length > 0 ? goalMinutes > 0 : true;
     if (evaluable) {
       if (minutos > 0) days.push({ fecha: cursor, minutos, goalMinutes });
       else if (cursor !== referenceDate) break;
@@ -137,12 +138,12 @@ export async function getMonthOverview(referenceDate: FechaISO): Promise<MonthDa
   const daysInMonth = new Date(year, month, 0).getDate();
   const monthPrefix = `${String(year).padStart(4, "0")}-${String(month).padStart(2, "0")}`;
 
-  const [aggregates, sessions, topics, blocks, config] = await Promise.all([
+  const [aggregates, sessions, topics, blocks, history] = await Promise.all([
     db.dailyAggregates.where("fecha").startsWith(monthPrefix).toArray(),
     db.studySessions.where("fecha").startsWith(monthPrefix).toArray(),
     db.topics.toArray(),
     db.blocks.toArray(),
-    getGoalConfig(),
+    getGoalRulesHistory(),
   ]);
   const minutesByDate = new Map(aggregates.map((a) => [a.fecha, a.minutosTotales]));
   const topicById = new Map(topics.map((t) => [t.id, t]));
@@ -162,7 +163,7 @@ export async function getMonthOverview(referenceDate: FechaISO): Promise<MonthDa
   return Array.from({ length: daysInMonth }, (_, i) => {
     const fecha = `${monthPrefix}-${String(i + 1).padStart(2, "0")}`;
     const dayTopics = topicsByDate.get(fecha);
-    const goalMinutes = dailyGoalHoursFor(config, fecha) * 60;
+    const goalMinutes = dailyGoalHoursAt(history, fecha) * 60;
     return {
       fecha,
       minutos: minutesByDate.get(fecha) ?? 0,
@@ -258,9 +259,7 @@ export async function getWeeklyReport(weekStart: FechaISO): Promise<WeeklyReport
  *  se cumplió ese objetivo. El día de hoy solo entra en el cómputo si ya está cumplido,
  *  para no penalizar una jornada aún a medias. */
 export async function getGoalsCompliance(referenceDate: FechaISO): Promise<number> {
-  const config = await getGoalConfig();
-  if (config.rules.length === 0) return 0;
-
+  const history = await getGoalRulesHistory();
   const aggregates = await db.dailyAggregates.toArray();
   const minutesByDate = new Map(aggregates.map((a) => [a.fecha, a.minutosTotales]));
   const activeDates = aggregates.filter((a) => a.minutosTotales > 0).map((a) => a.fecha);
@@ -270,7 +269,7 @@ export async function getGoalsCompliance(referenceDate: FechaISO): Promise<numbe
   let applicable = 0;
   let met = 0;
   for (let fecha = firstDate; fecha <= referenceDate; fecha = addDays(fecha, 1)) {
-    const goalMinutes = dailyGoalHoursFor(config, fecha) * 60;
+    const goalMinutes = dailyGoalHoursAt(history, fecha) * 60;
     if (goalMinutes <= 0) continue;
     const isMet = (minutesByDate.get(fecha) ?? 0) >= goalMinutes;
     if (fecha === referenceDate && !isMet) continue;

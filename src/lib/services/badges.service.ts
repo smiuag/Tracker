@@ -35,7 +35,7 @@ export async function evaluateDayEndBadges(fecha: FechaISO): Promise<void> {
 
   const weekStart = startOfIsoWeek(fecha);
   const [weeklyGoalHours, weeklyMinutes] = await Promise.all([
-    getWeeklyGoalHours(),
+    getWeeklyGoalHours(fecha),
     getWeeklyMinutes(fecha),
   ]);
   if (weeklyGoalHours > 0 && weeklyMinutes >= weeklyGoalHours * 60) {

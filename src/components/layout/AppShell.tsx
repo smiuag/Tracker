@@ -1,4 +1,8 @@
+"use client";
+
 import type { ReactNode } from "react";
+import { usePathname } from "next/navigation";
+import { normalizePathname } from "@/lib/utils/path";
 import { SideNav } from "./SideNav";
 import { BottomNav } from "./BottomNav";
 import { DbInitializer } from "./DbInitializer";
@@ -9,6 +13,14 @@ import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 
 export function AppShell({ children }: { children: ReactNode }) {
+  const pathname = normalizePathname(usePathname());
+
+  // Páginas públicas (link-in-bio y guía de instalación): sin navegación ni
+  // mobiliario de la app — las ven visitantes de Instagram, no usuarios.
+  if (pathname === "/enlaces" || pathname === "/instalar") {
+    return <>{children}</>;
+  }
+
   return (
     <TooltipProvider>
       <div className="flex min-h-full">

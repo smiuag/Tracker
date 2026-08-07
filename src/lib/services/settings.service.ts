@@ -1,11 +1,12 @@
 import { db } from "@/lib/db/db";
-import { addDays, fromFechaISO } from "@/lib/utils/date";
-import type { GoalConfig, LegacyGoalConfig } from "@/types/settings";
+import { addDays, fromFechaISO, isoWeekDates, toFechaISO } from "@/lib/utils/date";
+import type { GoalConfig, GoalRule, GoalRulesEpoch, LegacyGoalConfig } from "@/types/settings";
 import type { FechaISO } from "@/types/common";
 
 export const BACKUP_REMINDER_INTERVAL_DAYS = 21;
 
 const GOAL_CONFIG_KEY = "goalConfig";
+const GOAL_RULES_HISTORY_KEY = "goalRulesHistory";
 const BLOCK_DURATION_KEY = "blockDurationMin";
 const LAST_SEEN_WEEK_KEY = "lastSeenWeekStart";
 const LAST_BACKUP_AT_KEY = "lastBackupAt";
@@ -42,8 +43,49 @@ export async function getGoalConfig(): Promise<GoalConfig> {
   return raw ? normalizeGoalConfig(raw) : DEFAULT_GOAL_CONFIG;
 }
 
+/**
+ * Guarda el objetivo y, si las franjas cambiaron, abre un tramo nuevo en el
+ * historial con vigencia desde hoy: los días anteriores se siguen evaluando
+ * con las franjas que tenían entonces.
+ */
 export async function setGoalConfig(config: GoalConfig): Promise<void> {
+  const history = await getGoalRulesHistory();
+  const today = toFechaISO(new Date());
+  const last = history[history.length - 1];
+  if (!last || JSON.stringify(last.rules) !== JSON.stringify(config.rules)) {
+    const next =
+      last && last.desde === today
+        ? [...history.slice(0, -1), { desde: today, rules: config.rules }]
+        : [...history, { desde: today, rules: config.rules }];
+    await db.settings.put({ key: GOAL_RULES_HISTORY_KEY, value: next });
+  }
   await db.settings.put({ key: GOAL_CONFIG_KEY, value: config });
+}
+
+/** Historial de franjas ordenado por vigencia. Si aún no existe (datos de
+ *  versiones anteriores), las franjas actuales rigen también el pasado. */
+export async function getGoalRulesHistory(): Promise<GoalRulesEpoch[]> {
+  const row = await db.settings.get(GOAL_RULES_HISTORY_KEY);
+  const stored = row?.value as GoalRulesEpoch[] | undefined;
+  if (stored && stored.length > 0) return stored;
+  const config = await getGoalConfig();
+  return [{ desde: "0000-01-01", rules: config.rules }];
+}
+
+/** Franjas vigentes en una fecha concreta. */
+export function rulesAt(history: GoalRulesEpoch[], fecha: FechaISO): GoalRule[] {
+  let rules: GoalRule[] = [];
+  for (const epoch of history) {
+    if (epoch.desde <= fecha) rules = epoch.rules;
+    else break;
+  }
+  return rules;
+}
+
+/** Horas objetivo de un día según las franjas vigentes ese día. */
+export function dailyGoalHoursAt(history: GoalRulesEpoch[], fecha: FechaISO): number {
+  const day = isoWeekday(fecha);
+  return rulesAt(history, fecha).find((r) => r.weekdays.includes(day))?.hours ?? 0;
 }
 
 export async function getBlockDurationMin(): Promise<number> {
@@ -101,62 +143,31 @@ export async function recordBackupExported(fecha: FechaISO): Promise<void> {
   await setNextBackupReminderAt(addDays(fecha, BACKUP_REMINDER_INTERVAL_DAYS));
 }
 
-/** Días de la semana (0 = lunes … 6 = domingo) en los que aplica alguna franja. */
-export function applicableWeekdays(config: GoalConfig): number[] {
-  const days = new Set<number>();
-  for (const rule of config.rules) rule.weekdays.forEach((d) => days.add(d));
-  return [...days].sort((a, b) => a - b);
-}
-
 function isoWeekday(fecha: FechaISO): number {
   const jsDay = fromFechaISO(fecha).getDay(); // 0 = domingo … 6 = sábado
   return jsDay === 0 ? 6 : jsDay - 1; // 0 = lunes … 6 = domingo
 }
 
-export function isApplicableDay(config: GoalConfig, fecha: FechaISO): boolean {
-  return applicableWeekdays(config).includes(isoWeekday(fecha));
-}
-
-/** Horas objetivo de un día concreto según su franja (0 si ninguna lo incluye). */
-export function dailyGoalHoursFor(config: GoalConfig, fecha: FechaISO): number {
-  const day = isoWeekday(fecha);
-  return config.rules.find((r) => r.weekdays.includes(day))?.hours ?? 0;
-}
-
-/** Horas objetivo de una semana completa: suma de todas las franjas. */
-export function weeklyGoalHoursFor(config: GoalConfig): number {
-  return config.rules.reduce((sum, r) => sum + r.hours * r.weekdays.length, 0);
-}
-
-/** Objetivo de horas para un día concreto (0 si ese día de la semana no aplica). */
+/** Objetivo de horas para un día concreto según las franjas vigentes entonces. */
 export async function getDailyGoalHours(fecha: FechaISO): Promise<number> {
-  const config = await getGoalConfig();
-  return dailyGoalHoursFor(config, fecha);
+  const history = await getGoalRulesHistory();
+  return dailyGoalHoursAt(history, fecha);
 }
 
-/** Objetivo semanal derivado de las franjas configuradas. */
-export async function getWeeklyGoalHours(): Promise<number> {
-  const config = await getGoalConfig();
-  return weeklyGoalHoursFor(config);
+/** Objetivo de la semana ISO de `referenceDate`: suma del objetivo vigente de cada día. */
+export async function getWeeklyGoalHours(referenceDate: FechaISO): Promise<number> {
+  const history = await getGoalRulesHistory();
+  return isoWeekDates(referenceDate).reduce((sum, d) => sum + dailyGoalHoursAt(history, d), 0);
 }
 
-/** Objetivo mensual derivado: suma del objetivo de cada día del mes de referencia. */
+/** Objetivo mensual: suma del objetivo vigente de cada día del mes de referencia. */
 export async function getMonthlyGoalHours(referenceDate: FechaISO): Promise<number> {
-  const config = await getGoalConfig();
-  if (config.rules.length === 0) return 0;
-  const hoursByWeekday = new Map<number, number>();
-  for (const rule of config.rules) {
-    for (const day of rule.weekdays) {
-      if (!hoursByWeekday.has(day)) hoursByWeekday.set(day, rule.hours);
-    }
-  }
+  const history = await getGoalRulesHistory();
   const [year, month] = referenceDate.split("-").map(Number);
   const daysInMonth = new Date(year, month, 0).getDate();
   let total = 0;
   for (let day = 1; day <= daysInMonth; day++) {
-    const jsDay = new Date(year, month - 1, day).getDay();
-    const isoDay = jsDay === 0 ? 6 : jsDay - 1;
-    total += hoursByWeekday.get(isoDay) ?? 0;
+    total += dailyGoalHoursAt(history, toFechaISO(new Date(year, month - 1, day)));
   }
   return total;
 }

@@ -14,6 +14,14 @@ export interface GoalConfig {
   fechaExamen: FechaISO | null;
 }
 
+/** Tramo del historial de franjas: `rules` rige desde `desde` (inclusive)
+ *  hasta el `desde` del siguiente tramo. Cambiar el objetivo solo añade un
+ *  tramo nuevo, sin alterar cómo se evalúan los días anteriores. */
+export interface GoalRulesEpoch {
+  desde: FechaISO;
+  rules: GoalRule[];
+}
+
 /** Forma antigua (una sola franja implícita), aún presente en datos guardados. */
 export interface LegacyGoalConfig {
   weekdaysMode: "todos" | "entre_semana" | "personalizado";
