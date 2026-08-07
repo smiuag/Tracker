@@ -22,7 +22,15 @@ export function HoursByTypeChart({ data }: HoursByTypeChartProps) {
         <div className="flex items-center gap-4">
           <ChartContainer config={{}} className="aspect-square size-32 shrink-0">
             <PieChart>
-              <Pie data={data} dataKey="minutos" nameKey="label" innerRadius={38} outerRadius={56} stroke="none">
+              <Pie
+                data={data}
+                dataKey="minutos"
+                nameKey="label"
+                innerRadius={38}
+                outerRadius={56}
+                stroke="none"
+                isAnimationActive={false}
+              >
                 {data.map((entry) => (
                   <Cell key={entry.tipo} fill={STUDY_TYPE_COLORS[entry.tipo]} />
                 ))}

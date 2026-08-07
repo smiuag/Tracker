@@ -4,7 +4,7 @@ import { EstadisticasView } from "@/components/estadisticas/EstadisticasView";
 export default function EstadisticasPage() {
   return (
     <>
-      <PageHeader title="Estadísticas" subtitle="¿Estoy mejorando?" />
+      <PageHeader title="Estadísticas" subtitle="¿Estoy siendo constante?" />
       <EstadisticasView />
     </>
   );

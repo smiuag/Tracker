@@ -47,7 +47,9 @@ export function WeeklyEvolutionChart({ data }: WeeklyEvolutionChartProps) {
                 />
               }
             />
-            <Bar dataKey="minutos" fill="var(--color-minutos)" radius={6} maxBarSize={48} />
+            {/* Sin animación: al cambiar de periodo la gráfica se pinta al instante
+                y no retiene los toques sobre las pestañas. */}
+            <Bar dataKey="minutos" fill="var(--color-minutos)" radius={6} maxBarSize={48} isAnimationActive={false} />
           </BarChart>
         </ChartContainer>
       )}

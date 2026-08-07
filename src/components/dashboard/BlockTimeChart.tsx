@@ -69,7 +69,13 @@ export function BlockTimeChart({
               }
             />
             {STUDY_TYPES.map((tipo) => (
-              <Bar key={tipo} dataKey={tipo} stackId="tipo" fill={STUDY_TYPE_COLORS[tipo]} />
+              <Bar
+                key={tipo}
+                dataKey={tipo}
+                stackId="tipo"
+                fill={STUDY_TYPE_COLORS[tipo]}
+                isAnimationActive={false}
+              />
             ))}
           </BarChart>
         </ChartContainer>

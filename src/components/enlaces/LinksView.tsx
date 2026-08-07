@@ -10,6 +10,8 @@ const LINKS: {
   label: string;
   sub: string;
   external: boolean;
+  /** Aún sin destino real: se muestra apagado y sin enlace. */
+  disabled?: boolean;
 }[] = [
   {
     href: "/ayuda",
@@ -29,15 +31,17 @@ const LINKS: {
     href: "https://www.instagram.com/opobook/",
     icon: InstagramIcon,
     label: "Instagram",
-    sub: "Técnicas de estudio y motivación",
+    sub: "Muy pronto",
     external: true,
+    disabled: true,
   },
   {
     href: "https://www.tiktok.com/@opobook",
     icon: Music2,
     label: "TikTok",
-    sub: "Consejos en un minuto",
+    sub: "Muy pronto",
     external: true,
+    disabled: true,
   },
   {
     href: "mailto:opobook@protonmail.com?subject=Sugerencia%20Opobook",
@@ -72,23 +76,39 @@ export function LinksView() {
       </p>
 
       <nav aria-label="Enlaces de Opobook" className="mt-8 flex w-full max-w-sm flex-col gap-3">
-        {LINKS.map(({ href, icon: Icon, label, sub, external }) => (
-          <a
-            key={href}
-            href={href}
-            target={external ? "_blank" : undefined}
-            rel={external ? "noopener noreferrer" : undefined}
-            className="flex items-center gap-3.5 rounded-2xl border border-border bg-card p-4 transition-transform hover:scale-[1.02] focus-visible:outline-2 focus-visible:outline-ring"
-          >
-            <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary/40">
-              <Icon className="size-5 text-foreground" />
-            </span>
-            <span className="min-w-0">
-              <span className="block font-medium text-foreground">{label}</span>
-              <span className="block truncate text-xs text-muted-foreground">{sub}</span>
-            </span>
-          </a>
-        ))}
+        {LINKS.map(({ href, icon: Icon, label, sub, external, disabled }) =>
+          disabled ? (
+            <div
+              key={href}
+              aria-disabled
+              className="flex items-center gap-3.5 rounded-2xl border border-border bg-card p-4 opacity-55"
+            >
+              <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-secondary">
+                <Icon className="size-5 text-muted-foreground" />
+              </span>
+              <span className="min-w-0">
+                <span className="block font-medium text-muted-foreground">{label}</span>
+                <span className="block truncate text-xs text-muted-foreground">{sub}</span>
+              </span>
+            </div>
+          ) : (
+            <a
+              key={href}
+              href={href}
+              target={external ? "_blank" : undefined}
+              rel={external ? "noopener noreferrer" : undefined}
+              className="flex items-center gap-3.5 rounded-2xl border border-border bg-card p-4 transition-transform hover:scale-[1.02] focus-visible:outline-2 focus-visible:outline-ring"
+            >
+              <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary/40">
+                <Icon className="size-5 text-foreground" />
+              </span>
+              <span className="min-w-0">
+                <span className="block font-medium text-foreground">{label}</span>
+                <span className="block truncate text-xs text-muted-foreground">{sub}</span>
+              </span>
+            </a>
+          )
+        )}
       </nav>
 
       <p className="mt-10 text-xs text-muted-foreground">
