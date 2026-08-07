@@ -32,7 +32,7 @@ export function StreakBadge({ streak, streakDays, consecutiveActiveWeeks }: Stre
         </div>
         {streakDays.length > 0 && (
           <div className="flex gap-1">
-            {streakDays.map((day) => (
+            {streakDays.slice(-5).map((day) => (
               <span
                 key={day.fecha}
                 title={day.fecha}

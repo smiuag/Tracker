@@ -1,5 +1,6 @@
 "use client";
 
+import { Trash2 } from "lucide-react";
 import {
   Sheet,
   SheetContent,
@@ -10,6 +11,7 @@ import {
 import { DailyTaskChecklist } from "@/components/hoy/DailyTaskChecklist";
 import { AddPastSessionForm } from "./AddPastSessionForm";
 import { useDayDetail } from "@/hooks/useDayDetail";
+import { deleteSession } from "@/lib/services/sessions.service";
 import { minutesToHoursLabel, toFechaISO } from "@/lib/utils/date";
 import type { FechaISO } from "@/types/common";
 
@@ -33,7 +35,9 @@ export function DayDetailSheet({ fecha, onClose }: DayDetailSheetProps) {
                 {detail ? minutesToHoursLabel(detail.totalMinutes) : "Cargando…"}
               </SheetDescription>
             </SheetHeader>
-            <div className="flex flex-col gap-4 overflow-y-auto px-4 pb-[calc(4rem+env(safe-area-inset-bottom))]">
+            {/* *:shrink-0 evita que las tarjetas se compriman (y se corten) al
+                repartir la altura limitada del panel entre los hijos flex. */}
+            <div className="flex flex-col gap-4 overflow-y-auto px-4 pb-[calc(4rem+env(safe-area-inset-bottom))] *:shrink-0">
               <DailyTaskChecklist fecha={fecha} />
 
               {detail && detail.sessions.length > 0 ? (
@@ -59,8 +63,16 @@ export function DayDetailSheet({ fecha, onClose }: DayDetailSheetProps) {
                             <span className="truncate">{session.tipoLabel}</span>
                           </p>
                         </div>
-                        <span className="shrink-0 text-xs text-muted-foreground">
+                        <span className="flex shrink-0 items-center gap-2 text-xs text-muted-foreground">
                           {minutesToHoursLabel(session.duracionMin)}
+                          <button
+                            type="button"
+                            onClick={() => deleteSession(session.id)}
+                            className="text-muted-foreground hover:text-foreground"
+                            aria-label="Eliminar sesión"
+                          >
+                            <Trash2 className="size-3.5" />
+                          </button>
                         </span>
                       </div>
                       {session.observaciones && (
