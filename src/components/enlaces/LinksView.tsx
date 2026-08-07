@@ -12,10 +12,10 @@ const LINKS: {
   external: boolean;
 }[] = [
   {
-    href: "/",
+    href: "/instalar",
     icon: Download,
-    label: "Abrir Opobook",
-    sub: "La app gratuita para tu oposición",
+    label: "Descargar la app",
+    sub: "Cómo instalarla en tu móvil u ordenador",
     external: false,
   },
   {
