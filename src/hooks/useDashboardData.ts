@@ -11,7 +11,7 @@ import {
 } from "@/lib/services/settings.service";
 import {
   getConsecutiveActiveWeeks,
-  getCurrentTopic,
+  getLastStudiedTopic,
   getMinutesByBlock,
   getMinutesByType,
   getMinutesByTypeForTopic,
@@ -56,7 +56,7 @@ export function useDashboardData() {
       getTopicsCompletedCount(),
       getTopicsPendingCount(),
       getTopicProgressBreakdown(),
-      getCurrentTopic(),
+      getLastStudiedTopic(),
       getMinutesByBlock(),
       // Sesiones desde hoy (inclusive) = solo las de hoy
       getMinutesByType(today),

@@ -114,14 +114,13 @@ export async function getTopicProgressBreakdown(): Promise<TopicProgressBreakdow
   return { pendientes, enCurso, completados, total: topics.length };
 }
 
-/** El tema no acabado estudiado más recientemente (por `ultimoEstudio`). */
-export async function getCurrentTopic(): Promise<Topic | null> {
-  const topics = (await db.topics.where("estado").notEqual("acabado").toArray()).filter(
-    (t) => t.ultimoEstudio
-  );
-  if (topics.length === 0) return null;
-  topics.sort((a, b) => (b.ultimoEstudio! > a.ultimoEstudio! ? 1 : a.ultimoEstudio! < b.ultimoEstudio! ? -1 : 0));
-  return topics[0];
+/** Tema de la última sesión registrada, por fecha y hora reales de la sesión
+ *  (independientemente del estado del tema). */
+export async function getLastStudiedTopic(): Promise<Topic | null> {
+  const sessions = (await db.studySessions.toArray()).filter((s) => s.topicId);
+  if (sessions.length === 0) return null;
+  const last = sessions.reduce((max, s) => (s.inicio > max.inicio ? s : max));
+  return (await db.topics.get(last.topicId!)) ?? null;
 }
 
 export interface MonthDayOverview {

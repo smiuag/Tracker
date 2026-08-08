@@ -13,7 +13,7 @@ interface CurrentTopicCardProps {
 export function CurrentTopicCard({ topic, block, minutesByType }: CurrentTopicCardProps) {
   if (!topic) {
     return (
-      <SectionCard title="Tema en curso">
+      <SectionCard title="Último tema estudiado">
         <div className="flex items-center gap-3">
           <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-secondary">
             <BookOpen className="size-4 text-foreground" />
@@ -27,7 +27,7 @@ export function CurrentTopicCard({ topic, block, minutesByType }: CurrentTopicCa
   }
 
   return (
-    <SectionCard title="Tema en curso">
+    <SectionCard title="Último tema estudiado">
       {block && (
         <p className="mb-1 flex items-center gap-1.5 text-xs text-muted-foreground">
           <span

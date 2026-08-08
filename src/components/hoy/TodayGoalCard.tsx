@@ -20,23 +20,27 @@ export function TodayGoalCard({ totalMinutes, goalHours }: TodayGoalCardProps) {
     <Card>
       <CardContent>
         <p className="text-sm text-muted-foreground">Objetivo del día</p>
-        <p className="flex items-center gap-2 text-2xl font-semibold text-foreground">
-          <span>
-            {minutesToHoursLabel(totalMinutes)}
-            {goalHours && (
-              <span className="ml-1 text-base font-normal text-muted-foreground">
-                / {goalHours} h
-              </span>
+        {/* La estrella se alinea con el final de la barra: ambos comparten el
+            mismo contenedor con el mismo ancho máximo. */}
+        <div className="w-full max-w-xs">
+          <div className="flex items-center justify-between gap-2">
+            <p className="text-2xl font-semibold text-foreground">
+              {minutesToHoursLabel(totalMinutes)}
+              {goalHours && (
+                <span className="ml-1 text-base font-normal text-muted-foreground">
+                  / {goalHours} h
+                </span>
+              )}
+            </p>
+            {exceeded && (
+              <Star
+                className={cn("size-5 shrink-0", GOAL_EXCEEDED_TEXT)}
+                fill="currentColor"
+                aria-label="Objetivo superado"
+              />
             )}
-          </span>
-          {exceeded && (
-            <Star
-              className={cn("size-5 shrink-0", GOAL_EXCEEDED_TEXT)}
-              fill="currentColor"
-              aria-label="Objetivo superado"
-            />
-          )}
-        </p>
+          </div>
+        </div>
         {goalHours ? (
           <Progress value={Math.min(100, percentage)} className="mt-2 w-full max-w-xs" />
         ) : (
