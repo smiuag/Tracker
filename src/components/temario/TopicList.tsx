@@ -34,16 +34,24 @@ export function TopicList({ topics, blocks, onSelect }: TopicListProps) {
   if (topics !== lastTopics) {
     setLastTopics(topics);
     const currentIds = new Set(topics.map((t) => t.id));
-    const knownIds = new Set(display.map((d) => d.topic.id));
-    const kept = display.map((d) =>
-      currentIds.has(d.topic.id)
-        ? { topic: topics.find((t) => t.id === d.topic.id)!, leaving: false }
-        : { ...d, leaving: true }
-    );
-    const added = topics
-      .filter((t) => !knownIds.has(t.id))
-      .map((topic) => ({ topic, leaving: false }));
-    setDisplay([...kept, ...added]);
+    // La base es SIEMPRE el orden actual del temario (bloque + nº de tema)…
+    const next: DisplayItem[] = topics.map((topic) => ({ topic, leaving: false }));
+    // …y cada tarjeta saliente se reinserta en su hueco anterior mientras se
+    // desvanece: delante del primer vecino que siga presente.
+    const leavingNow = display.filter((d) => !currentIds.has(d.topic.id) && !d.leaving);
+    for (const item of leavingNow) {
+      const prevIndex = display.findIndex((d) => d.topic.id === item.topic.id);
+      let insertAt = next.length;
+      for (let i = prevIndex + 1; i < display.length; i++) {
+        const idx = next.findIndex((n) => n.topic.id === display[i].topic.id);
+        if (idx !== -1) {
+          insertAt = idx;
+          break;
+        }
+      }
+      next.splice(insertAt, 0, { ...item, leaving: true });
+    }
+    setDisplay(next);
   }
 
   const anyLeaving = display.some((d) => d.leaving);
