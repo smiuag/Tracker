@@ -9,15 +9,21 @@ import type { TypeMinutes } from "@/lib/services/stats.service";
 
 interface HoursByTypeChartProps {
   data: TypeMinutes[];
+  title?: string;
+  emptyMessage?: string;
 }
 
-export function HoursByTypeChart({ data }: HoursByTypeChartProps) {
+export function HoursByTypeChart({
+  data,
+  title = "Distribución por tipo de estudio",
+  emptyMessage = "No hay sesiones en este periodo.",
+}: HoursByTypeChartProps) {
   const total = data.reduce((sum, d) => sum + d.minutos, 0);
 
   return (
-    <SectionCard title="Distribución por tipo de estudio">
+    <SectionCard title={title}>
       {data.length === 0 ? (
-        <p className="text-sm text-muted-foreground">No hay sesiones en este periodo.</p>
+        <p className="text-sm text-muted-foreground">{emptyMessage}</p>
       ) : (
         <div className="flex items-center gap-4">
           <ChartContainer config={{}} className="aspect-square size-32 shrink-0">

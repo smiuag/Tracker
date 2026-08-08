@@ -4,6 +4,7 @@ import { CheckCircle2, LayoutDashboard, ListTodo, Target } from "lucide-react";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { StatTile } from "@/components/shared/StatTile";
 import { useDashboardData } from "@/hooks/useDashboardData";
+import { HoursByTypeChart } from "@/components/estadisticas/HoursByTypeChart";
 import { ExamCountdownCard } from "./ExamCountdownCard";
 import { WeeklyHoursCard } from "./WeeklyHoursCard";
 import { StreakBadge } from "./StreakBadge";
@@ -74,6 +75,12 @@ export function ProgresoView() {
         <StatTile icon={CheckCircle2} label="Temas completados" value={String(data.topicsCompleted)} />
         <StatTile icon={ListTodo} label="Temas restantes" value={String(data.topicsPending)} />
       </div>
+
+      <HoursByTypeChart
+        data={data.todayMinutesByType}
+        title="Estudio de hoy"
+        emptyMessage="Aún no has registrado estudio hoy."
+      />
 
       <CurrentTopicCard
         topic={data.currentTopic}

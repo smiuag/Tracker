@@ -19,26 +19,24 @@ export function TodayGoalCard({ totalMinutes, goalHours }: TodayGoalCardProps) {
   return (
     <Card>
       <CardContent>
-        <div className="flex items-start justify-between gap-3">
-          <div>
-            <p className="text-sm text-muted-foreground">Objetivo del día</p>
-            <p className="text-2xl font-semibold text-foreground">
-              {minutesToHoursLabel(totalMinutes)}
-              {goalHours && (
-                <span className="ml-1 text-base font-normal text-muted-foreground">
-                  / {goalHours} h
-                </span>
-              )}
-            </p>
-          </div>
+        <p className="text-sm text-muted-foreground">Objetivo del día</p>
+        <p className="flex items-center gap-2 text-2xl font-semibold text-foreground">
+          <span>
+            {minutesToHoursLabel(totalMinutes)}
+            {goalHours && (
+              <span className="ml-1 text-base font-normal text-muted-foreground">
+                / {goalHours} h
+              </span>
+            )}
+          </span>
           {exceeded && (
             <Star
-              className={cn("mt-1 size-6 shrink-0", GOAL_EXCEEDED_TEXT)}
+              className={cn("size-5 shrink-0", GOAL_EXCEEDED_TEXT)}
               fill="currentColor"
               aria-label="Objetivo superado"
             />
           )}
-        </div>
+        </p>
         {goalHours ? (
           <Progress value={Math.min(100, percentage)} className="mt-2 w-full max-w-xs" />
         ) : (
